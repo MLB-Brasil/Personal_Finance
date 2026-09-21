@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Personal Finance">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Personal Finance</title>
+<script src="personal-finance.config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>try { var t = localStorage.getItem("pf.theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<style>
+:root {
+  --bg: #f3f4fa; --surface: #ffffff; --surface2: #eef0f8; --text: #171a2b; --muted: #6b7190; --border: #e3e6f2;
+  --accent: #4f46e5; --accent2: #7c3aed; --neg: #e5484d; --pos: #12a150; --warn: #f59e0b;
+  --p0: #e5484d; --p1: #f59e0b; --p2: #3b82f6; --p3: #94a3b8;
+  --shadow: 0 6px 24px rgba(40, 45, 90, .08);
+  --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
+}
+:root { color-scheme: light; }
+/* tema escuro: forçado (data-theme="dark") ou automático quando o sistema pede e não há "light" forçado */
+:root[data-theme="dark"] { color-scheme: dark; --bg: #0e1018; --surface: #171a26; --surface2: #202436; --text: #eef0fa; --muted: #98a0bf; --border: #262b3f;
+  --accent: #7c7cff; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; --bg: #0e1018; --surface: #171a26; --surface2: #202436; --text: #eef0fa; --muted: #98a0bf; --border: #262b3f;
+    --accent: #7c7cff; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; }
+body { background: var(--bg); color: var(--text); font: 15px/1.4 -apple-system, "Segoe UI", Roboto, system-ui, sans-serif; overscroll-behavior-y: contain; }
+button, input, select { font: inherit; color: inherit; }
+button { border: 0; background: none; cursor: pointer; }
+.app { max-width: 560px; margin: 0 auto; min-height: 100%; padding-bottom: calc(96px + var(--sab)); }
+
+/* topo */
+.top { position: sticky; top: 0; z-index: 10; padding: calc(var(--sat) + 12px) 16px 8px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.top h1 { margin: 0 0 10px; font-size: 22px; letter-spacing: -.3px; display: flex; justify-content: space-between; align-items: center; }
+.top h1 small { font-size: 13px; color: var(--muted); font-weight: 500; }
+.brand { display: flex; align-items: center; gap: 9px; }
+.hr { display: flex; align-items: center; gap: 10px; }
+.ibtn { width: 34px; height: 34px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); display: grid; place-content: center; color: var(--text); }
+.ibtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* resumo anual */
+.grow { margin-bottom: 12px; }
+.grow:last-child { margin-bottom: 0; }
+.gt { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.gt span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gt b { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.gt em { font-style: normal; color: var(--muted); font-weight: 600; margin-left: 6px; }
+.grow .tr { height: 6px; border-radius: 4px; background: var(--surface2); overflow: hidden; margin-top: 5px; }
+.grow .tr i { display: block; height: 100%; border-radius: 4px; background: var(--c, var(--accent)); }
+.mrow { display: grid; grid-template-columns: 32px 1fr 92px; gap: 10px; align-items: center; margin-bottom: 9px; font-size: 12px; }
+.mrow > b { color: var(--muted); }
+.mrow .bars { display: grid; gap: 3px; }
+.mrow .bars i { display: block; height: 6px; border-radius: 3px; }
+.mrow .bars .g { background: var(--pos); } .mrow .bars .r { background: var(--neg); }
+.mrow > span { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
+.lgd { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.lgd i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+.logo { width: 30px; height: 30px; display: block; flex: none; filter: drop-shadow(0 3px 8px rgba(79, 70, 229, .35)); }
+.logo svg { width: 100%; height: 100%; display: block; }
+
+/* receitas: lista minimalista */
+.seg.scope { margin-bottom: 12px; }
+#recList { padding-bottom: 72px; }
+.lines { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); padding: 2px 16px; }
+.ln { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.ln span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ln b { color: var(--pos); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ln:last-child { border-bottom: 0; }
+.ln.tot { cursor: default; font-weight: 700; border-top: 1px solid var(--border); border-bottom: 0; }
+.ln.tot span { color: var(--muted); font-weight: 600; }
+.lh { display: flex; justify-content: space-between; padding: 14px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); font-weight: 700; }
+.lh:first-child { padding-top: 12px; }
+/* filtro de mês */
+.mfbar { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; }
+.mf { flex: 1; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); font-weight: 650; text-align: left; }
+.mf svg { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.mf svg.chev { margin-left: auto; stroke: var(--muted); }
+.mf span { flex: none; }
+.mfnow { flex: none; padding: 10px 14px; border-radius: 14px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 700; font-size: 13px; }
+.mgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+.mbtn { position: relative; padding: 14px 4px; border-radius: 14px; background: var(--surface2); font-weight: 650; font-size: 14px; border: 2px solid transparent; }
+.mbtn.on { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.mbtn.now::after { content: "atual"; position: absolute; left: 0; right: 0; bottom: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--pos); }
+.mbtn.now { padding-bottom: 20px; }
+
+main { padding: 6px 16px 0; }
+.view { display: none; } .view.on { display: block; animation: fade .18s ease; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* hero */
+.hero { border-radius: 24px; padding: 20px; color: #fff; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); box-shadow: 0 12px 30px rgba(79, 70, 229, .32); }
+.hero .lbl { font-size: 12px; opacity: .8; text-transform: uppercase; letter-spacing: .6px; }
+.hero .big { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin: 2px 0 12px; font-variant-numeric: tabular-nums; }
+.meter { height: 8px; border-radius: 6px; background: rgba(255,255,255,.25); overflow: hidden; }
+.meter i { display: block; height: 100%; border-radius: 6px; background: #fff; transition: width .4s ease; }
+.meter.over i { background: #ffd0d2; }
+.hero .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+.hero .row div { background: rgba(255,255,255,.14); border-radius: 14px; padding: 9px 11px; }
+.hero.green { background: linear-gradient(135deg, #0f9d58 0%, #12a150 45%, #0ea5a4 100%); box-shadow: 0 12px 30px rgba(18, 161, 80, .3); margin-bottom: 16px; }
+.hero .row span { display: block; font-size: 11px; opacity: .8; }
+.hero .row b { font-size: 15px; font-variant-numeric: tabular-nums; }
+
+/* filtros */
+.filters { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 16px -16px 10px; padding-inline: 16px; }
+.filters::-webkit-scrollbar { display: none; }
+.f { flex: none; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-weight: 600; font-size: 13px; color: var(--muted); }
+.f i { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--muted)); }
+.f.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+.search { width: 100%; padding: 11px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 12px; outline: none; }
+.search:focus { border-color: var(--accent); }
+
+/* cartões */
+.list { display: grid; gap: 10px; }
+.item { position: relative; display: grid; grid-template-columns: 46px 1fr auto; gap: 12px; align-items: center; padding: 12px 14px 12px 16px; background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; cursor: pointer; transition: transform .1s; }
+.item:active { transform: scale(.985); }
+.item::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--pc); }
+.day { width: 46px; height: 46px; border-radius: 14px; background: var(--surface2); display: grid; place-content: center; text-align: center; }
+.day b { font-size: 17px; line-height: 1; } .day small { font-size: 9px; color: var(--muted); text-transform: uppercase; }
+.info { min-width: 0; }
+.info h3 { margin: 0 0 6px; font-size: 14.5px; font-weight: 650; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 6px; color: var(--pc); background: color-mix(in srgb, var(--pc) 14%, transparent); }
+.pill { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--surface2); color: var(--muted); }
+.pill.s1 { background: color-mix(in srgb, var(--warn) 18%, transparent); color: #b7791f; }
+.pill.s2 { background: color-mix(in srgb, var(--pos) 18%, transparent); color: var(--pos); }
+:root[data-theme="dark"] .pill.s1 { color: var(--warn); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pill.s1 { color: var(--warn); } }
+.vals { text-align: right; font-variant-numeric: tabular-nums; }
+.vals b { display: block; font-size: 15px; }
+.vals small { display: block; font-size: 11px; color: var(--muted); }
+.vals em { font-style: normal; font-size: 11px; font-weight: 700; }
+.neg { color: var(--neg); } .pos { color: var(--pos); }
+.empty { text-align: center; color: var(--muted); padding: 40px 10px; }
+
+/* resumo */
+.panel { background: var(--surface); border-radius: 20px; padding: 16px; box-shadow: var(--shadow); margin-bottom: 14px; }
+.panel h2 { margin: 0 0 12px; font-size: 15px; }
+.brow { display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: center; margin-bottom: 10px; font-size: 13px; }
+.brow .tr { height: 10px; border-radius: 6px; background: var(--surface2); overflow: hidden; }
+.brow .tr i { display: block; height: 100%; border-radius: 6px; background: var(--c); }
+.brow span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.stats div { background: var(--surface2); border-radius: 14px; padding: 12px 6px; }
+.stats b { display: block; font-size: 22px; } .stats span { font-size: 11px; color: var(--muted); }
+.top5 { display: grid; gap: 8px; font-size: 13px; }
+.top5 div { display: flex; justify-content: space-between; gap: 10px; } .top5 span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ajustes */
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field label { font-size: 12px; color: var(--muted); font-weight: 600; }
+.field input, .field select { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface2); outline: none; font-size: 16px; }
+.field input:focus { border-color: var(--accent); }
+.btn { width: 100%; padding: 13px; border-radius: 14px; background: var(--surface2); font-weight: 650; margin-bottom: 8px; display: block; text-align: center; }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.danger { color: var(--neg); }
+.note { font-size: 12px; color: var(--muted); margin: 8px 2px 0; }
+
+/* navegação */
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; justify-content: center; padding: 8px 16px calc(var(--sab) + 8px); background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--border); }
+.nav div { display: flex; width: 100%; max-width: 528px; }
+.nav button { flex: 1; display: grid; justify-items: center; gap: 2px; padding: 6px 0; color: var(--muted); font-size: 11px; font-weight: 600; }
+.nav button.on { color: var(--accent); }
+.nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.fab { position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(82px + var(--sab)); z-index: 21; width: 58px; height: 58px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 30px; line-height: 1; box-shadow: 0 10px 24px rgba(79, 70, 229, .45); display: grid; place-content: center; }
+.fab:active { transform: scale(.94); }
+
+/* folha de edição */
+.scrim { position: fixed; inset: 0; z-index: 30; background: rgba(8, 10, 24, .5); opacity: 0; pointer-events: none; transition: opacity .2s; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; max-width: 560px; margin: 0 auto; max-height: 92%; overflow-y: auto; background: var(--surface); border-radius: 26px 26px 0 0; padding: 10px 18px calc(var(--sab) + 18px); transform: translateY(105%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+body.sheet-open .scrim, body.sheetr-open .scrim, body.sheetm-open .scrim { opacity: 1; pointer-events: auto; }
+body.sheet-open #sheet, body.sheetr-open #sheetR, body.sheetm-open #sheetM { transform: none; }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto 12px; }
+.sheet h2 { margin: 0 0 14px; font-size: 18px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.seg { display: flex; gap: 6px; }
+.seg button { flex: 1; padding: 10px 4px; border-radius: 12px; background: var(--surface2); font-weight: 700; font-size: 13px; border: 2px solid transparent; }
+.seg button.on { border-color: var(--c, var(--accent)); color: var(--c, var(--accent)); background: color-mix(in srgb, var(--c, var(--accent)) 12%, transparent); }
+.toast { position: fixed; left: 50%; bottom: calc(150px + var(--sab)); z-index: 40; transform: translate(-50%, 20px); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; opacity: 0; pointer-events: none; transition: .25s; max-width: 90%; text-align: center; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+/* autenticação */
+#authGate { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px; background: var(--bg); }
+#authGate[hidden] { display: none; }
+.auth-card { width: min(100%, 390px); padding: 28px; border-radius: 24px; background: var(--surface); box-shadow: var(--shadow); text-align: center; }
+.auth-card .logo { margin: 0 auto 14px; width: 52px; height: 52px; }
+.auth-card h1 { margin: 0 0 8px; font-size: 24px; }
+.auth-card p { margin: 0 0 20px; color: var(--muted); }
+.auth-card .btn { margin-bottom: 10px; }
+.auth-card .btn:last-child { margin-bottom: 0; }
+.auth-card .note { margin-top: 16px; }
+body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: none; }
+.account-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.account-line span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--muted); }
+</style>
+</head>
+<body class="auth-locked">
+<section id="authGate" aria-labelledby="authTitle">
+  <div class="auth-card">
+    <span class="logo" id="authLogo" aria-hidden="true"></span>
+    <h1 id="authTitle">Personal Finance</h1>
+    <p>Entre para manter seus dados financeiros privados e sincronizados entre dispositivos.</p>
+    <button class="btn primary" id="loginGoogle" type="button">Continuar com Google</button>
+    <button class="btn" id="loginGithub" type="button">Continuar com GitHub</button>
+    <p class="note" id="authStatus">Configurando acesso seguro…</p>
+  </div>
+</section>
+<div class="app">
+  <header class="top">
+    <h1><span class="brand"><span class="logo" id="logo" aria-hidden="true"></span>Personal Finance</span><button class="ibtn" id="themeBtn" aria-label="Alternar tema"></button></h1>
+    <div class="mfbar">
+      <button class="mf" id="mFilter" aria-haspopup="dialog" aria-label="Filtrar por mês">
+        <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+        <span id="mfLabel"></span>
+        <svg viewBox="0 0 24 24" class="chev"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <button class="mfnow" id="mNow" hidden>Mês atual</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- DESPESAS -->
+    <section class="view on" id="v-list">
+      <div class="hero">
+        <div class="lbl">Gasto real no mês</div>
+        <div class="big" id="hReal">R$ 0,00</div>
+        <div class="meter" id="hMeter"><i style="width:0"></i></div>
+        <div class="row">
+          <div><span>Receita</span><b id="hRec">R$ 0,00</b></div>
+          <div><span>Orçado</span><b id="hOrc">R$ 0,00</b></div>
+          <div><span>Diferença (orçado − real)</span><b id="hDif">R$ 0,00</b></div>
+          <div><span>Saldo (receita − real)</span><b id="hSaldo">—</b></div>
+        </div>
+      </div>
+      <div class="filters" id="filters"></div>
+      <input class="search" id="search" type="search" placeholder="Buscar despesa…" aria-label="Buscar despesa">
+      <div class="list" id="list"></div>
+    </section>
+
+    <!-- RECEITAS -->
+    <section class="view" id="v-rec">
+      <div class="hero green">
+        <div class="lbl">Receita no mês</div>
+        <div class="big" id="rTotal">R$ 0,00</div>
+        <div class="meter" id="rMeter"><i style="width:0"></i></div>
+        <div class="row">
+          <div><span>Despesa real</span><b id="rReal">R$ 0,00</b></div>
+          <div><span>Saldo</span><b id="rSaldo">R$ 0,00</b></div>
+        </div>
+      </div>
+      <div class="seg scope" id="recScope">
+        <button type="button" data-s="mes" class="on">Este mês</button>
+        <button type="button" data-s="ano">Ano todo</button>
+      </div>
+      <div id="recList"></div>
+    </section>
+
+    <!-- RESUMO -->
+    <section class="view" id="v-sum">
+      <div class="seg scope" id="sumScope">
+        <button type="button" data-s="mes" class="on">Mês</button>
+        <button type="button" data-s="ano">Ano 2026</button>
+      </div>
+      <div id="sumAno" hidden></div>
+      <div id="sumMes">
+      <div class="panel"><h2>Receita x despesa</h2><div id="cmp"></div></div>
+      <div class="panel"><h2>Gasto real por prioridade</h2><div id="byPri"></div></div>
+      <div class="panel"><h2>Andamento</h2><div class="stats" id="byStatus"></div></div>
+      <div class="panel"><h2>Maiores gastos</h2><div class="top5" id="top5"></div></div>
+      </div>
+    </section>
+
+    <!-- AJUSTES -->
+    <section class="view" id="v-set">
+      <div class="panel">
+        <h2>Conta</h2>
+        <div class="account-line"><span id="authUser">Não conectado</span><button class="btn danger" id="logoutBtn" type="button" style="width:auto; margin:0; padding:9px 12px">Sair</button></div>
+        <p class="note">Seus lançamentos são vinculados exclusivamente a esta conta.</p>
+      </div>
+      <div class="panel">
+        <h2>Aparência</h2>
+        <div class="seg" id="themeSeg" style="margin-bottom:16px">
+          <button type="button" data-t="auto">Automático</button>
+          <button type="button" data-t="light">Claro</button>
+          <button type="button" data-t="dark">Escuro</button>
+        </div>
+        <button class="btn" id="copyPrev">Copiar despesas e receitas do mês anterior</button>
+        <p class="note">Copia tudo do mês anterior: despesas voltam com “Real” zerado e status “Não iniciada”.</p>
+      </div>
+      <div class="panel">
+        <h2>Backup</h2>
+        <button class="btn primary" id="exportJson">Exportar backup (JSON)</button>
+        <button class="btn" id="exportCsv">Exportar mês (CSV)</button>
+        <label class="btn" style="cursor:pointer">Importar backup (JSON)<input type="file" id="importJson" accept="application/json" hidden></label>
+        <p class="note">Os dados ficam vinculados à sua conta e sincronizados. O backup continua recomendado.</p>
+      </div>
+      <div class="panel">
+        <h2>Instalar como app</h2>
+        <p class="note" style="margin:0">Android (Chrome): menu ⋮ → “Instalar app”. iPhone (Safari): Compartilhar → “Adicionar à Tela de Início”.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<button class="fab" id="fab" aria-label="Nova despesa">+</button>
+
+<nav class="nav"><div>
+  <button data-view="list" class="on"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Despesas</button>
+  <button data-view="rec"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Receitas</button>
+  <button data-view="sum"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Resumo</button>
+  <button data-view="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Ajustes</button>
+</div></nav>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <div class="grab"></div>
+  <h2 id="sheetTitle">Nova despesa</h2>
+  <div class="field"><label for="fDesp">Despesa</label><input id="fDesp" type="text" autocomplete="off" placeholder="Ex.: MERCADO"></div>
+  <div class="two">
+    <div class="field"><label for="fDia">Vencimento (dia)</label><input id="fDia" type="number" min="1" max="31" inputmode="numeric"></div>
+    <div class="field"><label>Prioridade</label><div class="seg" id="fPri"></div></div>
+  </div>
+  <div class="two">
+    <div class="field"><label for="fOrc">R$ Orçado</label><input id="fOrc" type="number" step="0.01" inputmode="decimal"></div>
+    <div class="field"><label for="fReal">R$ Real</label><input id="fReal" type="number" step="0.01" inputmode="decimal"></div>
+  </div>
+  <div class="field"><label>Status</label><div class="seg" id="fSt"></div></div>
+  <div class="field"><label for="fObs">Observações</label><input id="fObs" type="text" autocomplete="off"></div>
+  <button class="btn primary" id="sSave">Salvar</button>
+  <button class="btn danger" id="sDel">Excluir</button>
+</div>
+<div class="sheet" id="sheetM" role="dialog" aria-modal="true" aria-labelledby="sheetMTitle">
+  <div class="grab"></div>
+  <h2 id="sheetMTitle">Filtrar por mês</h2>
+  <div class="mgrid" id="mGrid"></div>
+  <button class="btn" id="mToday">Voltar ao mês atual</button>
+</div>
+<div class="sheet" id="sheetR" role="dialog" aria-modal="true" aria-labelledby="sheetRTitle">
+  <div class="grab"></div>
+  <h2 id="sheetRTitle">Nova receita</h2>
+  <div class="field"><label for="rDesc">Receita (descrição)</label><input id="rDesc" type="text" autocomplete="off" placeholder="Ex.: Salário, Freelancer, Cashback"></div>
+  <div class="field"><label for="rVal">R$ Valor</label><input id="rVal" type="number" step="0.01" inputmode="decimal"></div>
+  <button class="btn primary" id="rSave">Salvar</button>
+  <button class="btn danger" id="rDel">Excluir</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// Produção começa sem dados compartilhados. Cada conta cria seu próprio estado no banco.
+window.FCST_SEED = {};
+</script>
+<script>
+(() => {
+  const KEY = "fcst2026.v1";
+  const PRI = ["P0", "P1", "P2", "P3"];
+  const PC = { P0: "var(--p0)", P1: "var(--p1)", P2: "var(--p2)", P3: "var(--p3)" };
+  const ST = ["Não iniciada", "Em andamento", "Concluída"];
+  const MES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const ANO = 2026;
+  const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const pct0 = new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 0 });
+  const $ = (id) => document.getElementById(id);
+  const uid = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const authConfig = window.PERSONAL_FINANCE_CONFIG || {};
+  const hasAuthConfig = /^https:\/\/.+\.supabase\.co$/i.test(authConfig.supabaseUrl || "") && Boolean(authConfig.supabaseAnonKey) && Boolean(window.supabase);
+  const supabaseClient = hasAuthConfig ? window.supabase.createClient(authConfig.supabaseUrl, authConfig.supabaseAnonKey) : null;
+  let session = null, cloudReady = false, remoteSaveTimer = null, activeUserId = null;
+
+  // Logo: monograma "P" (Personal) + moeda com seta de crescimento. Mesmo desenho do icon.svg.
+  const LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+    <linearGradient id="lc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs>
+    <rect width="512" height="512" rx="116" fill="url(#lg)"/>
+    <path d="M178 392V128h100a76 76 0 0 1 0 152h-100" fill="none" stroke="#fff" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="352" cy="356" r="72" fill="url(#lc)" stroke="#6553e7" stroke-width="16"/>
+    <path d="M321 374l22-22 16 14 26-30M367 336h18v18" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  $("logo").innerHTML = LOGO;
+  $("authLogo").innerHTML = LOGO;
+  const logoUri = "data:image/svg+xml," + encodeURIComponent(LOGO);
+  document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((l) => (l.href = logoUri));
+
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  const num = (v) => { const n = parseFloat(String(v).replace(",", ".")); return Number.isFinite(n) ? n : 0; };
+  const sign = (v) => (v < -0.005 ? "neg" : v > 0.005 ? "pos" : "");
+
+  let state = load();
+  // O mês vigente (do calendário) é sempre o filtro ativo ao abrir o app.
+  const nowKey = () => `${ANO}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
+  let lastNow = nowKey();
+  let cur = lastNow;
+  let recScope = "mes", sumScope = "mes", view = "list", fPri = "", q = "", editing = null, sheet = null, delArmed = false;
+
+  // Cada mês tem `items` (despesas) e `receitas` (colunas K "Receita" e L "R$" da planilha).
+  // Dados antigos tinham um único número `receita`; ele vira uma receita "Receita".
+  function migrate(s) {
+    for (const m of Object.values(s.months)) {
+      m.items ||= [];
+      if (!Array.isArray(m.receitas)) m.receitas = m.receita > 0 ? [{ id: uid(), descricao: "Receita", valor: m.receita }] : [];
+      delete m.receita;
+    }
+    return s;
+  }
+  function load() {
+    try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.months) return migrate(s); } catch (e) {}
+    const months = {};
+    for (const [k, m] of Object.entries(window.FCST_SEED || {})) months[k] = { receitas: m.receitas || [], items: m.items.map((i) => ({ id: uid(), ...i })) };
+    return migrate({ months });
+  }
+  const save = () => {
+    try { localStorage.setItem(session?.user ? `${KEY}.${session.user.id}` : KEY, JSON.stringify(state)); } catch (e) {}
+    if (!cloudReady || !session?.user || !supabaseClient) return;
+    clearTimeout(remoteSaveTimer);
+    remoteSaveTimer = setTimeout(async () => {
+      const snapshot = JSON.parse(JSON.stringify(state));
+      const { error } = await supabaseClient.from("finance_states").upsert({ user_id: session.user.id, state: snapshot, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+      if (error) toast("Não foi possível sincronizar. Suas alterações continuam neste dispositivo.");
+    }, 450);
+  };
+  const M = () => (state.months[cur] ||= { receitas: [], items: [] });
+  const totals = () => {
+    const it = M().items, o = it.reduce((s, i) => s + i.orcado, 0), r = it.reduce((s, i) => s + i.real, 0);
+    const rec = M().receitas.reduce((s, x) => s + x.valor, 0);
+    return { o, r, d: o - r, rec, saldo: rec - r };
+  };
+  const mIdx = () => Number(cur.split("-")[1]) - 1;
+
+  let toastT;
+  function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2200); }
+
+  // ---------- render ----------
+  function renderMonths() {
+    $("mfLabel").textContent = `${MES[mIdx()]} ${ANO}`;
+    $("mNow").hidden = cur === nowKey();
+  }
+
+  function renderHero() {
+    const t = totals();
+    $("hReal").textContent = brl.format(t.r);
+    $("hRec").textContent = brl.format(t.rec);
+    $("hOrc").textContent = brl.format(t.o);
+    $("hDif").textContent = brl.format(t.d);
+    $("hSaldo").textContent = t.rec ? brl.format(t.saldo) : "—";
+    const used = t.o ? t.r / t.o : (t.r ? 1 : 0);
+    $("hMeter").classList.toggle("over", used > 1);
+    $("hMeter").firstElementChild.style.width = Math.min(100, used * 100) + "%";
+  }
+
+  function renderFilters() {
+    const opts = [["", "Todas", ""], ...PRI.map((p) => [p, p, PC[p]])];
+    $("filters").innerHTML = opts.map(([v, l, c]) => `<button class="f${fPri === v ? " on" : ""}" data-p="${v}">${c ? `<i style="--c:${c}"></i>` : ""}${l}</button>`).join("");
+  }
+
+  function renderList() {
+    const items = M().items.filter((i) => (!fPri || i.prioridade === fPri) && (!q || i.despesa.toLowerCase().includes(q))).sort((a, b) => a.dia - b.dia || a.despesa.localeCompare(b.despesa));
+    if (!items.length) { $("list").innerHTML = `<div class="empty">${M().items.length ? "Nada encontrado." : "Nenhuma despesa neste mês.<br>Toque em + para adicionar."}</div>`; return; }
+    $("list").innerHTML = items.map((i) => {
+      const d = i.orcado - i.real, si = ST.indexOf(i.status);
+      return `<article class="item" data-id="${i.id}" style="--pc:${PC[i.prioridade]}">
+        <div class="day"><b>${i.dia || "–"}</b><small>dia</small></div>
+        <div class="info"><h3>${esc(i.despesa || "(sem nome)")}</h3>
+          <div class="meta"><span class="tag">${i.prioridade}</span><button class="pill s${si}" data-act="st">${i.status}</button></div></div>
+        <div class="vals"><b>${brl.format(i.real)}</b><small>de ${brl.format(i.orcado)}</small>${i.orcado || i.real ? `<em class="${sign(d)}">${d > 0.005 ? "+" : ""}${brl.format(d)}</em>` : ""}</div>
+      </article>`;
+    }).join("");
+  }
+
+  function renderRec() {
+    const t = totals(), rs = M().receitas;
+    $("rTotal").textContent = brl.format(t.rec);
+    $("rReal").textContent = brl.format(t.r);
+    $("rSaldo").textContent = brl.format(t.saldo);
+    const used = t.rec ? t.r / t.rec : (t.r ? 1 : 0);
+    $("rMeter").classList.toggle("over", used > 1);
+    $("rMeter").firstElementChild.style.width = Math.min(100, used * 100) + "%";
+    const line = (r, m) => `<div class="ln" data-rid="${r.id}" data-m="${m}"><span>${esc(r.descricao || "(sem descrição)")}</span><b>${brl.format(r.valor)}</b></div>`;
+    document.querySelectorAll("#recScope button").forEach((b) => b.classList.toggle("on", b.dataset.s === recScope));
+    let html;
+    if (recScope === "mes") {
+      html = rs.length ? `<div class="lines">${rs.map((r) => line(r, cur)).join("")}<div class="ln tot"><span>Total</span><b>${brl.format(t.rec)}</b></div></div>`
+        : `<div class="empty">Nenhuma receita neste mês.<br>Toque em + para adicionar.</div>`;
+    } else {
+      const keys = Object.keys(state.months).filter((k) => state.months[k].receitas.length).sort();
+      const sum = (m) => m.receitas.reduce((s, r) => s + r.valor, 0);
+      html = keys.length ? `<div class="lines">${keys.map((k) => `<div class="lh"><span>${MES[Number(k.split("-")[1]) - 1]}</span><span>${brl.format(sum(state.months[k]))}</span></div>${state.months[k].receitas.map((r) => line(r, k)).join("")}`).join("")}
+        <div class="ln tot"><span>Total do ano</span><b>${brl.format(keys.reduce((s, k) => s + sum(state.months[k]), 0))}</b></div></div>`
+        : `<div class="empty">Nenhuma receita cadastrada em ${ANO}.</div>`;
+    }
+    $("recList").innerHTML = html;
+  }
+
+  function renderSummary() {
+    const it = M().items, t = totals();
+    const mx = Math.max(t.rec, t.r, 1);
+    $("cmp").innerHTML = `<div class="brow" style="--c:var(--pos)"><b style="color:var(--pos)">Rec.</b><div class="tr"><i style="width:${(t.rec / mx) * 100}%"></i></div><span>${brl.format(t.rec)}</span></div>
+      <div class="brow" style="--c:var(--neg)"><b style="color:var(--neg)">Desp.</b><div class="tr"><i style="width:${(t.r / mx) * 100}%"></i></div><span>${brl.format(t.r)}</span></div>
+      <p class="note" style="margin:0">${t.rec ? `Saldo: <b class="${sign(t.saldo)}">${brl.format(t.saldo)}</b> · ${pct0.format(t.r / t.rec)} da receita comprometida` : "Cadastre as receitas do mês na aba Receitas."}</p>`;
+    const by = Object.fromEntries(PRI.map((p) => [p, 0]));
+    it.forEach((i) => (by[i.prioridade] += i.real));
+    const max = Math.max(...Object.values(by), 1);
+    $("byPri").innerHTML = PRI.map((p) => `<div class="brow" style="--c:${PC[p]}"><b style="color:${PC[p]}">${p}</b><div class="tr"><i style="width:${(by[p] / max) * 100}%"></i></div><span>${brl.format(by[p])}${t.r ? " · " + pct0.format(by[p] / t.r) : ""}</span></div>`).join("");
+    $("byStatus").innerHTML = ST.map((s) => `<div><b>${it.filter((i) => i.status === s).length}</b><span>${s}</span></div>`).join("");
+    const top = [...it].sort((a, b) => b.real - a.real).slice(0, 5).filter((i) => i.real > 0);
+    $("top5").innerHTML = top.length ? top.map((i) => `<div><span>${esc(i.despesa)}</span><b>${brl.format(i.real)}</b></div>`).join("") : `<span class="note">Sem gastos ainda.</span>`;
+    renderYear();
+  }
+
+  // ---------- resumo anual ----------
+  const pct1 = new Intl.NumberFormat("pt-BR", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const sumBy = (arr, f) => arr.reduce((s, x) => s + f(x), 0);
+  // Agrupa despesas que mudam só o número da parcela (ex.: "ACORDO LOJAS CEM 04/05" e "… 05/05") sob o mesmo nome.
+  const baseName = (s) => s.replace(/\s*[-–]?\s*\d{1,3}\s*\/\s*\d{1,3}\s*$/, "").trim() || s.trim();
+  function group(list, labelOf, valueOf) {
+    const g = new Map();
+    for (const x of list) {
+      const label = labelOf(x), k = label.toUpperCase(), c = g.get(k) || { label, v: 0, n: 0 };
+      c.v += valueOf(x); c.n++; g.set(k, c);
+    }
+    return [...g.values()].filter((c) => c.v > 0).sort((a, b) => b.v - a.v);
+  }
+  const growRows = (rows, total, color) => {
+    const mx = Math.max(...rows.map((r) => r.v), 1);
+    return rows.map((r) => `<div class="grow" style="--c:${color}"><div class="gt"><span>${esc(r.label)}${r.n > 1 ? ` <small style="color:var(--muted)">×${r.n}</small>` : ""}</span><b>${brl.format(r.v)}<em>${pct1.format(r.v / total)}</em></b></div><div class="tr"><i style="width:${(r.v / mx) * 100}%"></i></div></div>`).join("");
+  };
+
+  function renderYear() {
+    const ms = Object.entries(state.months).sort(([a], [b]) => a.localeCompare(b));
+    const rs = ms.flatMap(([, m]) => m.receitas), is = ms.flatMap(([, m]) => m.items);
+    const rec = sumBy(rs, (r) => r.valor), gasto = sumBy(is, (i) => i.real), orc = sumBy(is, (i) => i.orcado), saldo = rec - gasto;
+    if (!rec && !gasto) { $("sumAno").innerHTML = `<div class="empty">Sem dados em ${ANO} ainda.</div>`; return; }
+
+    const used = rec ? gasto / rec : 1;
+    const origens = group(rs, (r) => r.descricao.trim() || "(sem descrição)", (r) => r.valor);
+    const gastos = group(is, (i) => baseName(i.despesa || "(sem nome)"), (i) => i.real);
+    const pri = PRI.map((p) => ({ p, v: sumBy(is.filter((i) => i.prioridade === p), (i) => i.real) }));
+    const months = ms.filter(([, m]) => m.receitas.length || m.items.some((i) => i.real > 0));
+    const mx = Math.max(...months.map(([, m]) => Math.max(sumBy(m.receitas, (r) => r.valor), sumBy(m.items, (i) => i.real))), 1);
+
+    $("sumAno").innerHTML = `
+      <div class="hero">
+        <div class="lbl">Receita total em ${ANO}</div>
+        <div class="big">${brl.format(rec)}</div>
+        <div class="meter${used > 1 ? " over" : ""}"><i style="width:${Math.min(100, used * 100)}%"></i></div>
+        <div class="row">
+          <div><span>Gasto total (real)</span><b>${brl.format(gasto)}</b></div>
+          <div><span>Saldo (receita − gasto)</span><b>${brl.format(saldo)}</b></div>
+          <div><span>Receita comprometida</span><b>${rec ? pct1.format(gasto / rec) : "—"}</b></div>
+          <div><span>Orçado no ano</span><b>${brl.format(orc)}</b></div>
+        </div>
+      </div>
+      <div class="panel" style="margin-top:14px"><h2>Mês a mês</h2>
+        <div class="lgd"><span><i style="background:var(--pos)"></i>Receita</span><span><i style="background:var(--neg)"></i>Gasto</span><span>Saldo à direita</span></div>
+        ${months.map(([k, m]) => { const r = sumBy(m.receitas, (x) => x.valor), g = sumBy(m.items, (x) => x.real);
+          return `<div class="mrow"><b>${MES[Number(k.split("-")[1]) - 1].slice(0, 3)}</b><div class="bars"><i class="g" style="width:${(r / mx) * 100}%"></i><i class="r" style="width:${(g / mx) * 100}%"></i></div><span class="${sign(r - g)}">${brl.format(r - g)}</span></div>`; }).join("")}
+      </div>
+      <div class="panel"><h2>Receita por origem</h2>${origens.length ? growRows(origens, rec, "var(--pos)") : `<span class="note">Nenhuma receita cadastrada.</span>`}
+        ${origens.length ? `<p class="note" style="margin:12px 0 0">Total: <b>${brl.format(rec)}</b> · ${origens.length} ${origens.length > 1 ? "origens" : "origem"}</p>` : ""}</div>
+      <div class="panel"><h2>Gastos por nome</h2>${gastos.length ? growRows(gastos, gasto, "var(--accent)") : `<span class="note">Nenhum gasto real lançado.</span>`}
+        ${gastos.length ? `<p class="note" style="margin:12px 0 0">Total: <b>${brl.format(gasto)}</b> · % sobre o gasto total. “×N” = lançamentos agrupados (parcelas como 04/05 e 05/05 contam juntas).</p>` : ""}</div>
+      <div class="panel"><h2>Gasto por prioridade</h2>${pri.map((x) => `<div class="brow" style="--c:${PC[x.p]}"><b style="color:${PC[x.p]}">${x.p}</b><div class="tr"><i style="width:${(x.v / Math.max(...pri.map((y) => y.v), 1)) * 100}%"></i></div><span>${brl.format(x.v)}${gasto ? " · " + pct0.format(x.v / gasto) : ""}</span></div>`).join("")}</div>`;
+  }
+
+  // ---------- tema ----------
+  const THEME_ICON = {
+    auto: `<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>`,
+    light: `<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>`,
+    dark: `<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>`
+  };
+  const THEME_NAME = { auto: "Automático", light: "Claro", dark: "Escuro" };
+  let theme = (() => { try { const t = localStorage.getItem("pf.theme"); return t === "light" || t === "dark" ? t : "auto"; } catch (e) { return "auto"; } })();
+  function applyTheme() {
+    const r = document.documentElement;
+    if (theme === "auto") delete r.dataset.theme; else r.dataset.theme = theme;
+    try { localStorage.setItem("pf.theme", theme); } catch (e) {}
+    $("themeBtn").innerHTML = `<svg viewBox="0 0 24 24">${THEME_ICON[theme]}</svg>`;
+    $("themeBtn").title = `Tema: ${THEME_NAME[theme]}`;
+    document.querySelectorAll("#themeSeg button").forEach((b) => b.classList.toggle("on", b.dataset.t === theme));
+  }
+  $("themeBtn").onclick = () => { theme = { auto: "light", light: "dark", dark: "auto" }[theme]; applyTheme(); toast(`Tema: ${THEME_NAME[theme]}`); };
+  $("themeSeg").onclick = (e) => { const b = e.target.closest("[data-t]"); if (b) { theme = b.dataset.t; applyTheme(); } };
+
+  $("sumScope").onclick = (e) => { const b = e.target.closest("[data-s]"); if (b) { sumScope = b.dataset.s; showSum(); } };
+  function showSum() {
+    $("sumMes").hidden = sumScope !== "mes"; $("sumAno").hidden = sumScope !== "ano";
+    document.querySelectorAll("#sumScope button").forEach((b) => b.classList.toggle("on", b.dataset.s === sumScope));
+  }
+
+  function renderAll() {
+    renderMonths(); renderHero(); renderFilters(); renderList(); renderRec(); renderSummary();
+  }
+
+  function setView(v) {
+    view = v;
+    document.querySelectorAll(".view").forEach((s) => s.classList.toggle("on", s.id === "v-" + v));
+    document.querySelectorAll(".nav button").forEach((b) => b.classList.toggle("on", b.dataset.view === v));
+    $("fab").style.display = v === "list" || v === "rec" ? "" : "none";
+    $("fab").setAttribute("aria-label", v === "rec" ? "Nova receita" : "Nova despesa");
+    window.scrollTo({ top: 0 });
+  }
+
+  // ---------- folha de edição ----------
+  function segment(el, values, colors, current, onPick) {
+    el.innerHTML = values.map((v) => `<button type="button" data-v="${v}" class="${v === current ? "on" : ""}" style="--c:${colors ? colors[v] : "var(--accent)"}">${v}</button>`).join("");
+    el.onclick = (e) => { const b = e.target.closest("button"); if (!b) return; onPick(b.dataset.v); el.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); };
+  }
+  function openSheet(id) {
+    editing = id; delArmed = false; $("sDel").textContent = "Excluir";
+    const i = id ? M().items.find((x) => x.id === id) : { dia: 30, despesa: "", prioridade: "P1", orcado: 0, real: 0, status: "Não iniciada", obs: "" };
+    sheet = { ...i };
+    $("sheetTitle").textContent = id ? "Editar despesa" : "Nova despesa";
+    $("fDesp").value = i.despesa; $("fDia").value = i.dia || ""; $("fOrc").value = i.orcado || ""; $("fReal").value = i.real || ""; $("fObs").value = i.obs || "";
+    segment($("fPri"), PRI, PC, sheet.prioridade, (v) => (sheet.prioridade = v));
+    segment($("fSt"), ST, null, sheet.status, (v) => (sheet.status = v));
+    $("sDel").style.display = id ? "" : "none";
+    document.body.classList.add("sheet-open");
+    if (!id) setTimeout(() => $("fDesp").focus(), 300);
+  }
+  const closeSheet = () => document.body.classList.remove("sheet-open", "sheetr-open", "sheetm-open");
+
+  // ---------- folha de receita ----------
+  let recEditing = null, recArmed = false;
+  function openRec(id) {
+    recEditing = id; recArmed = false; $("rDel").textContent = "Excluir";
+    const r = id ? M().receitas.find((x) => x.id === id) : { descricao: "", valor: 0 };
+    $("sheetRTitle").textContent = id ? "Editar receita" : "Nova receita";
+    $("rDesc").value = r.descricao; $("rVal").value = r.valor || "";
+    $("rDel").style.display = id ? "" : "none";
+    document.body.classList.add("sheetr-open");
+    if (!id) setTimeout(() => $("rDesc").focus(), 300);
+  }
+  $("rSave").onclick = () => {
+    const descricao = $("rDesc").value.trim(), valor = num($("rVal").value);
+    if (!descricao) { toast("Informe a descrição da receita"); $("rDesc").focus(); return; }
+    if (recEditing) Object.assign(M().receitas.find((x) => x.id === recEditing), { descricao, valor });
+    else M().receitas.push({ id: uid(), descricao, valor });
+    save(); closeSheet(); renderAll(); toast("Receita salva");
+  };
+  $("rDel").onclick = () => {
+    if (!recArmed) { recArmed = true; $("rDel").textContent = "Toque de novo para confirmar"; return; }
+    M().receitas = M().receitas.filter((x) => x.id !== recEditing);
+    save(); closeSheet(); renderAll(); toast("Receita excluída");
+  };
+  $("recList").onclick = (e) => {
+    const c = e.target.closest("[data-rid]"); if (!c) return;
+    if (c.dataset.m !== cur) { cur = c.dataset.m; renderAll(); }
+    openRec(c.dataset.rid);
+  };
+  $("recScope").onclick = (e) => { const b = e.target.closest("[data-s]"); if (b) { recScope = b.dataset.s; renderRec(); } };
+
+  $("sSave").onclick = () => {
+    const name = $("fDesp").value.trim();
+    if (!name) { toast("Informe o nome da despesa"); $("fDesp").focus(); return; }
+    Object.assign(sheet, { despesa: name, dia: Math.min(31, Math.max(0, Math.round(num($("fDia").value)))), orcado: num($("fOrc").value), real: num($("fReal").value), obs: $("fObs").value.trim() });
+    if (editing) Object.assign(M().items.find((x) => x.id === editing), sheet);
+    else M().items.push({ ...sheet, id: uid() });
+    save(); closeSheet(); renderAll(); toast("Salvo");
+  };
+  $("sDel").onclick = () => {
+    if (!delArmed) { delArmed = true; $("sDel").textContent = "Toque de novo para confirmar"; return; }
+    M().items = M().items.filter((x) => x.id !== editing);
+    save(); closeSheet(); renderAll(); toast("Despesa excluída");
+  };
+  $("scrim").onclick = closeSheet;
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
+
+  // ---------- eventos ----------
+  $("mFilter").onclick = () => {
+    $("mGrid").innerHTML = MES.map((n, i) => {
+      const k = `${ANO}-${String(i + 1).padStart(2, "0")}`;
+      return `<button type="button" class="mbtn${k === cur ? " on" : ""}${k === nowKey() ? " now" : ""}" data-m="${k}">${n}</button>`;
+    }).join("");
+    document.body.classList.add("sheetm-open");
+  };
+  $("mGrid").onclick = (e) => { const b = e.target.closest("[data-m]"); if (b) { cur = b.dataset.m; closeSheet(); renderAll(); } };
+  const goNow = () => { cur = nowKey(); closeSheet(); renderAll(); };
+  $("mToday").onclick = goNow; $("mNow").onclick = goNow;
+  // Se o app ficou aberto na virada do mês, volta para o novo mês vigente.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && nowKey() !== lastNow) { lastNow = nowKey(); goNow(); }
+  });
+  $("filters").onclick = (e) => { const b = e.target.closest("[data-p]"); if (b) { fPri = b.dataset.p; renderFilters(); renderList(); } };
+  $("search").oninput = (e) => { q = e.target.value.trim().toLowerCase(); renderList(); };
+  $("list").onclick = (e) => {
+    const card = e.target.closest(".item"); if (!card) return;
+    if (e.target.closest("[data-act=st]")) {
+      const it = M().items.find((x) => x.id === card.dataset.id);
+      it.status = ST[(ST.indexOf(it.status) + 1) % ST.length];
+      save(); renderList(); renderSummary(); return;
+    }
+    openSheet(card.dataset.id);
+  };
+  $("fab").onclick = () => (view === "rec" ? openRec(null) : openSheet(null));
+  document.querySelector(".nav").onclick = (e) => { const b = e.target.closest("[data-view]"); if (b) setView(b.dataset.view); };
+  $("copyPrev").onclick = () => {
+    const m = mIdx();
+    if (m === 0) return toast("Não há mês anterior em " + ANO);
+    const prev = state.months[`${ANO}-${String(m).padStart(2, "0")}`];
+    if (!prev || !(prev.items.length || prev.receitas.length)) return toast("O mês anterior está vazio");
+    prev.items.forEach((i) => M().items.push({ ...i, id: uid(), real: 0, status: "Não iniciada" }));
+    prev.receitas.forEach((r) => M().receitas.push({ ...r, id: uid() }));
+    save(); renderAll(); setView("list"); toast(`${prev.items.length} despesas e ${prev.receitas.length} receitas copiadas`);
+  };
+
+  function download(name, content, type) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([content], { type })); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  $("exportJson").onclick = () => { download("personal-finance.json", JSON.stringify(state, null, 2), "application/json"); toast("Backup gerado"); };
+  $("exportCsv").onclick = () => {
+    const c = (v) => `"${String(v).replace(/"/g, '""')}"`, n = (v) => v.toFixed(2).replace(".", ",");
+    const rows = M().items.map((i) => [i.dia, c(i.despesa), i.prioridade, n(i.orcado), n(i.real), n(i.orcado - i.real), i.status, c(i.obs || "")].join(";"));
+    const recs = M().receitas.map((r) => [c(r.descricao), n(r.valor)].join(";"));
+    download(`personal-finance-${cur}.csv`, "﻿" + ["Vencimento;Despesa;Prioridade;Orçado;Real;Dif;Status;Observações", ...rows, "", "Receita;R$", ...recs].join("\r\n"), "text/csv;charset=utf-8");
+    toast("CSV gerado");
+  };
+  $("importJson").onchange = async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try {
+      const d = JSON.parse(await f.text()); if (!d.months) throw new Error("formato inválido");
+      if (!confirm("Isso substitui todos os dados deste aparelho. Continuar?")) return;
+      state = migrate(d); save(); renderAll(); toast("Backup importado");
+    } catch (err) { toast("Falha ao importar: " + err.message); }
+    e.target.value = "";
+  };
+
+  function setAuthStatus(message) { $("authStatus").textContent = message; }
+  function lockApp() {
+    cloudReady = false; session = null; activeUserId = null;
+    clearTimeout(remoteSaveTimer);
+    document.body.classList.add("auth-locked");
+    $("authGate").hidden = false;
+    $("authUser").textContent = "Não conectado";
+  }
+  async function loadCloudState(user) {
+    const { data, error } = await supabaseClient.from("finance_states").select("state").eq("user_id", user.id).maybeSingle();
+    if (error) throw error;
+    state = data?.state?.months ? migrate(data.state) : { months: {} };
+    try { localStorage.setItem(`${KEY}.${user.id}`, JSON.stringify(state)); } catch (e) {}
+    renderAll();
+  }
+  async function applySession(nextSession) {
+    if (!nextSession?.user) { lockApp(); return; }
+    const user = nextSession.user, userId = user.id;
+    session = nextSession; activeUserId = userId; cloudReady = false;
+    document.body.classList.remove("auth-locked");
+    $("authGate").hidden = true;
+    $("authUser").textContent = user.email || user.user_metadata?.user_name || "Conta conectada";
+    try {
+      await loadCloudState(user);
+      if (activeUserId !== userId) return;
+      cloudReady = true;
+    } catch (error) {
+      lockApp();
+      setAuthStatus("Não foi possível carregar seus dados. Tente novamente.");
+    }
+  }
+  async function signIn(provider) {
+    if (!supabaseClient) return;
+    setAuthStatus("Redirecionando para login seguro…");
+    const redirectTo = `${window.location.origin}${window.location.pathname}`;
+    const { error } = await supabaseClient.auth.signInWithOAuth({ provider, options: { redirectTo } });
+    if (error) setAuthStatus(`Falha ao iniciar login: ${error.message}`);
+  }
+  async function bootAuth() {
+    if (!supabaseClient) {
+      setAuthStatus("Configure o arquivo personal-finance.config.js antes de publicar.");
+      $("loginGoogle").disabled = true; $("loginGithub").disabled = true;
+      return;
+    }
+    $("loginGoogle").onclick = () => signIn("google");
+    $("loginGithub").onclick = () => signIn("github");
+    $("logoutBtn").onclick = async () => {
+      const { error } = await supabaseClient.auth.signOut();
+      if (error) toast("Não foi possível encerrar a sessão.");
+    };
+    supabaseClient.auth.onAuthStateChange((_event, nextSession) => { applySession(nextSession); });
+    const { data, error } = await supabaseClient.auth.getSession();
+    if (error) { setAuthStatus("Não foi possível validar a sessão."); return; }
+    await applySession(data.session);
+  }
+
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
+  applyTheme(); showSum(); renderAll(); setView("list"); bootAuth();
+})();
+</script>
+</body>
+</html>
