@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#3E7C8F">
+<meta name="theme-color" content="#8B7FD9">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,7 +18,7 @@
 <style>
 :root {
   --bg: #f3f4fa; --surface: #ffffff; --surface2: #eef0f8; --text: #171a2b; --muted: #6b7190; --border: #e3e6f2;
-  --accent: #3E7C8F; --accent2: #5C9BAE; --neg: #e5484d; --pos: #12a150; --warn: #f59e0b;
+  --accent: #8B7FD9; --accent2: #A597E8; --neg: #e5484d; --pos: #12a150; --warn: #f59e0b;
   --st0: #e5675b; --st1: #f2a93b; --st2: #2fa774;
   --shadow: 0 6px 24px rgba(40, 45, 90, .08);
   --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
@@ -26,10 +26,10 @@
 :root { color-scheme: light; }
 /* tema escuro: forçado (data-theme="dark") ou automático quando o sistema pede e não há "light" forçado */
 :root[data-theme="dark"] { color-scheme: dark; --bg: #0e1018; --surface: #171a26; --surface2: #202436; --text: #eef0fa; --muted: #98a0bf; --border: #262b3f;
-  --accent: #7FC2D4; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
+  --accent: #B9AEFF; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { color-scheme: dark; --bg: #0e1018; --surface: #171a26; --surface2: #202436; --text: #eef0fa; --muted: #98a0bf; --border: #262b3f;
-    --accent: #7FC2D4; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
+    --accent: #B9AEFF; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; }
@@ -42,7 +42,7 @@ button { border: 0; background: none; cursor: pointer; }
 .top { position: sticky; top: 0; z-index: 10; padding: calc(var(--sat) + 12px) 16px 8px; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .top h1 { margin: 0 0 10px; font-size: 22px; letter-spacing: -.3px; display: flex; justify-content: space-between; align-items: center; }
 .top h1 small { font-size: 13px; color: var(--muted); font-weight: 500; }
-.brand { display: flex; align-items: center; gap: 9px; }
+.brand { display: flex; align-items: center; gap: 12px; }
 .hr { display: flex; align-items: center; gap: 10px; }
 .ibtn { width: 34px; height: 34px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); display: grid; place-content: center; color: var(--text); }
 .ibtn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
@@ -64,7 +64,7 @@ button { border: 0; background: none; cursor: pointer; }
 .mrow > span { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
 .lgd { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
 .lgd i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
-.logo { width: 30px; height: 30px; display: block; flex: none; filter: drop-shadow(0 3px 8px rgba(62, 124, 143, .35)); }
+.logo { width: 44px; height: 44px; display: block; flex: none; filter: drop-shadow(0 4px 12px rgba(139, 127, 217, .45)); }
 .logo svg { width: 100%; height: 100%; display: block; }
 
 /* receitas: lista minimalista */
@@ -81,11 +81,11 @@ button { border: 0; background: none; cursor: pointer; }
 .lh:first-child { padding-top: 12px; }
 /* filtro de mês */
 .mfbar { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; }
-.mf { flex: 1; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); font-weight: 650; text-align: left; }
-.mf svg { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.mf { flex: 1; display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-weight: 650; font-size: 13px; text-align: left; }
+.mf svg { width: 15px; height: 15px; flex: none; fill: none; stroke: var(--accent); stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .mf svg.chev { margin-left: auto; stroke: var(--muted); }
 .mf span { flex: none; }
-.mfnow { flex: none; padding: 10px 14px; border-radius: 14px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 700; font-size: 13px; }
+.mfnow { flex: none; padding: 7px 12px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 700; font-size: 11.5px; }
 .mgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
 .mbtn { position: relative; padding: 14px 4px; border-radius: 14px; background: var(--surface2); font-weight: 650; font-size: 14px; border: 2px solid transparent; }
 .mbtn.on { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); }
@@ -97,7 +97,7 @@ main { padding: 6px 16px 0; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* hero */
-.hero { border-radius: 24px; padding: 20px; color: #fff; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); box-shadow: 0 12px 30px rgba(62, 124, 143, .32); }
+.hero { border-radius: 24px; padding: 20px; color: #fff; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); box-shadow: 0 12px 30px rgba(139, 127, 217, .32); }
 .hero .lbl { font-size: 12px; opacity: .8; text-transform: uppercase; letter-spacing: .6px; }
 .hero .big { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin: 2px 0 12px; font-variant-numeric: tabular-nums; }
 .meter { height: 8px; border-radius: 6px; background: rgba(255,255,255,.25); overflow: hidden; }
@@ -173,7 +173,7 @@ main { padding: 6px 16px 0; }
 .nav button { flex: 1; display: grid; justify-items: center; gap: 2px; padding: 6px 0; color: var(--muted); font-size: 11px; font-weight: 600; }
 .nav button.on { color: var(--accent); }
 .nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.fab { position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(82px + var(--sab)); z-index: 21; width: 58px; height: 58px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 30px; line-height: 1; box-shadow: 0 10px 24px rgba(62, 124, 143, .45); display: grid; place-content: center; }
+.fab { position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(82px + var(--sab)); z-index: 21; width: 58px; height: 58px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 30px; line-height: 1; box-shadow: 0 10px 24px rgba(139, 127, 217, .45); display: grid; place-content: center; }
 .fab:active { transform: scale(.94); }
 
 /* folha de edição */
@@ -206,7 +206,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 
 /* ---- Layout 7 · Blocos ---- */
 .hero { background: none; box-shadow: none; padding: 0; color: var(--text); display: grid; gap: 10px; }
-.bigtile { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 12px 30px rgba(62, 124, 143, .28); }
+.bigtile { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 12px 30px rgba(139, 127, 217, .28); }
 .bigtile .big { margin-bottom: 12px; }
 .hero .row { margin-top: 0; gap: 10px; }
 .hero .row div { border-radius: 20px; padding: 14px; background: #E1EBFA; }
@@ -225,6 +225,37 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 .info { width: 100%; }
 .info h3 { font-size: 13.5px; -webkit-line-clamp: 2; }
 @media (max-width: 380px){ .list { grid-template-columns: 1fr; } }
+
+/* ---- Boas-vindas e gráfico de status (visualização) ---- */
+.hi { font-size: 13.5px; font-weight: 600; color: var(--muted); margin: 2px 0 10px; }
+.hi b { color: var(--text); font-weight: 700; }
+.donutcard { display: flex; gap: 16px; align-items: center; background: var(--surface); border-radius: 20px; padding: 16px; box-shadow: var(--shadow); margin: 14px 70px 14px 0; }
+/* margem à direita: sem ela, os valores do gráfico ficam embaixo do botão "+" fixo em telas mais baixas */
+.donut { width: 92px; height: 92px; border-radius: 50%; flex: none; position: relative; }
+.donut::after { content: attr(data-t); position: absolute; inset: 18px; background: var(--surface); border-radius: 50%; display: grid; place-content: center; font-size: 11.5px; font-weight: 800; text-align: center; line-height: 1.25; white-space: pre-line; }
+.dleg { flex: 1; display: grid; gap: 7px; font-size: 12.5px; min-width: 0; }
+.dleg div { display: flex; justify-content: space-between; gap: 8px; }
+.dleg span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dleg i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; flex: none; }
+.dleg b { flex: none; }
+
+/* ---- Opção 3 · Por categorias ---- */
+.catcard { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
+.cat-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; }
+.cat-h .ct { min-width: 0; }
+.cat-h h3 { margin: 0; font-size: 14.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cat-h small { font-size: 11px; color: var(--muted); }
+.cat-h .cv { text-align: right; display: flex; align-items: center; gap: 8px; flex: none; }
+.cat-h .cv b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.cat-h svg { width: 16px; height: 16px; stroke: var(--muted); transition: transform .15s ease; flex: none; }
+.catcard.open .cat-h svg { transform: rotate(180deg); }
+.cat-body { display: none; border-top: 1px solid var(--border); }
+.catcard.open .cat-body { display: block; }
+.cat-item { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-top: 1px solid var(--border); cursor: pointer; }
+.cat-item:first-child { border-top: 0; }
+.cat-item .cd { width: 30px; font-size: 12px; color: var(--muted); flex: none; }
+.cat-item .ci-pill { flex: 1; }
+.cat-item b { font-variant-numeric: tabular-nums; font-size: 13.5px; flex: none; }
 </style>
 </head>
 <body class="auth-locked">
@@ -241,6 +272,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 <div class="app">
   <header class="top">
     <h1><span class="brand"><span class="logo" id="logo" aria-hidden="true"></span>Personal Finance</span><button class="ibtn" id="themeBtn" aria-label="Alternar tema"></button></h1>
+    <div class="hi" id="hiUser" hidden></div>
     <div class="mfbar">
       <button class="mf" id="mFilter" aria-haspopup="dialog" aria-label="Filtrar por mês">
         <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
@@ -264,6 +296,10 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
           <div><span>Diferença (orçado − real)</span><b id="hDif">R$ 0,00</b></div>
           <div><span>Saldo (receita − real)</span><b id="hSaldo">—</b></div>
         </div>
+      </div>
+      <div class="donutcard" id="donutCard" hidden>
+        <div class="donut" id="donutRing"></div>
+        <div class="dleg" id="donutLeg"></div>
       </div>
       <div class="filters" id="filters"></div>
       <input class="search" id="search" type="search" placeholder="Buscar despesa…" aria-label="Buscar despesa">
@@ -399,7 +435,7 @@ window.FCST_SEED = {};
 
   // Logo: monograma "P" (Personal) + moeda com seta de crescimento. Mesmo desenho do icon.svg.
   const LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
-    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3E7C8F"/><stop offset="1" stop-color="#5C9BAE"/></linearGradient>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B7FD9"/><stop offset="1" stop-color="#A597E8"/></linearGradient>
     <linearGradient id="lc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs>
     <rect width="512" height="512" rx="116" fill="url(#lg)"/>
     <path d="M178 392V128h100a76 76 0 0 1 0 152h-100" fill="none" stroke="#fff" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
@@ -413,6 +449,17 @@ window.FCST_SEED = {};
   const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   const num = (v) => { const n = parseFloat(String(v).replace(",", ".")); return Number.isFinite(n) ? n : 0; };
   const sign = (v) => (v < -0.005 ? "neg" : v > 0.005 ? "pos" : "");
+  // Primeiro nome para a saudação: nome completo do provedor OAuth, o usuário do GitHub
+  // ou, na falta desses, a parte antes do @ do e-mail.
+  function primeiroNome(user) {
+    const meta = user.user_metadata || {};
+    const full = meta.full_name || meta.name;
+    if (full) return String(full).trim().split(/\s+/)[0];
+    const uname = meta.user_name || meta.preferred_username;
+    if (uname) return uname;
+    const local = (user.email || "").split("@")[0];
+    return local ? local.charAt(0).toUpperCase() + local.slice(1) : "";
+  }
 
   let state = load();
   // O mês vigente (do calendário) é sempre o filtro ativo ao abrir o app.
@@ -483,18 +530,53 @@ window.FCST_SEED = {};
     $("filters").innerHTML = opts.map(([v, l, c, k]) => `<button class="f${fSt === v ? " on" : ""}" data-p="${v}">${c ? `<i style="--c:${c}"></i>` : ""}${l}<span class="fn">${k}</span></button>`).join("");
   }
 
+  const gruposAbertos = new Set();
   function renderList() {
-    const items = M().items.filter((i) => (!fSt || i.status === fSt) && (!q || i.despesa.toLowerCase().includes(q))).sort((a, b) => a.dia - b.dia || a.despesa.localeCompare(b.despesa));
+    const items = M().items.filter((i) => (!fSt || i.status === fSt) && (!q || i.despesa.toLowerCase().includes(q)));
     if (!items.length) { $("list").innerHTML = `<div class="empty">${M().items.length ? "Nada encontrado." : "Nenhuma despesa neste mês.<br>Toque em + para adicionar."}</div>`; return; }
-    $("list").innerHTML = items.map((i) => {
-      const d = i.orcado - i.real, si = ST.indexOf(i.status);
-      return `<article class="item" data-id="${i.id}" style="--pc:${SC[i.status]}">
-        <div class="day"><b>${i.dia || "–"}</b><small>dia</small></div>
-        <div class="info"><h3>${esc(i.despesa || "(sem nome)")}</h3>
-          <div class="meta"><button class="pill s${si}" data-act="st">${ST_LABEL[i.status]}</button></div></div>
-        <div class="vals"><b>${brl.format(i.real)}</b><small>de ${brl.format(i.orcado)}</small>${i.orcado || i.real ? `<em class="${sign(d)}">${d > 0.005 ? "+" : ""}${brl.format(d)}</em>` : ""}</div>
-      </article>`;
+    const mapa = new Map();
+    items.forEach((i) => {
+      const label = baseName(i.despesa || "(sem nome)"), key = label.toUpperCase();
+      const g = mapa.get(key) || { label, key, real: 0, orcado: 0, itens: [] };
+      g.real += i.real; g.orcado += i.orcado; g.itens.push(i);
+      mapa.set(key, g);
+    });
+    const grupos = [...mapa.values()].sort((a, b) => b.real - a.real || b.orcado - a.orcado);
+    $("list").innerHTML = grupos.map((g) => {
+      g.itens.sort((a, b) => a.dia - b.dia);
+      const aberto = gruposAbertos.has(g.key);
+      return `<div class="catcard${aberto ? " open" : ""}" data-key="${esc(g.key)}">
+        <div class="cat-h">
+          <div class="ct"><h3>${esc(g.label)}</h3><small>${g.itens.length} lançamento${g.itens.length > 1 ? "s" : ""} · de ${brl.format(g.orcado)}</small></div>
+          <div class="cv"><b>${brl.format(g.real)}</b><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+        </div>
+        <div class="cat-body">${g.itens.map((i) => {
+          const si = ST.indexOf(i.status);
+          return `<div class="cat-item" data-id="${i.id}"><span class="cd">dia ${i.dia || "–"}</span><span class="ci-pill pill s${si}">${ST_LABEL[i.status]}</span><b>${brl.format(i.real)}</b></div>`;
+        }).join("")}</div>
+      </div>`;
     }).join("");
+  }
+
+  function renderDonutStatus() {
+    const it = M().items, card = $("donutCard");
+    if (!it.length) { card.hidden = true; return; }
+    card.hidden = false;
+    const total = it.reduce((a, i) => a + i.real, 0);
+    const by = Object.fromEntries(ST.map((s) => [s, 0]));
+    it.forEach((i) => (by[i.status] += i.real));
+    const ring = $("donutRing");
+    if (!total) {
+      ring.style.background = "var(--surface2)";
+      ring.dataset.t = it.length + (it.length > 1 ? "\ndespesas" : "\ndespesa");
+    } else {
+      let acc = 0; const fatias = [];
+      ST.forEach((s) => { const a = (acc / total) * 100; acc += by[s]; fatias.push(`${SC[s]} ${a}% ${(acc / total) * 100}%`); });
+      ring.style.background = `conic-gradient(${fatias.join(",")})`;
+      const domin = ST.reduce((a, b) => (by[a] >= by[b] ? a : b));
+      ring.dataset.t = by[domin] ? `${Math.round((by[domin] / total) * 100)}%\n${ST_LABEL[domin]}` : "";
+    }
+    $("donutLeg").innerHTML = ST.map((s) => `<div><span><i style="background:${SC[s]}"></i>${ST_LABEL[s]}</span><b>${brl.format(by[s])}</b></div>`).join("");
   }
 
   function renderRec() {
@@ -618,7 +700,7 @@ window.FCST_SEED = {};
   }
 
   function renderAll() {
-    renderMonths(); renderHero(); renderFilters(); renderList(); renderRec(); renderSummary();
+    renderMonths(); renderHero(); renderFilters(); renderList(); renderDonutStatus(); renderRec(); renderSummary();
   }
 
   function setView(v) {
@@ -713,13 +795,15 @@ window.FCST_SEED = {};
   $("filters").onclick = (e) => { const b = e.target.closest("[data-p]"); if (b) { fSt = b.dataset.p; renderFilters(); renderList(); } };
   $("search").oninput = (e) => { q = e.target.value.trim().toLowerCase(); renderList(); };
   $("list").onclick = (e) => {
-    const card = e.target.closest(".item"); if (!card) return;
-    if (e.target.closest("[data-act=st]")) {
-      const it = M().items.find((x) => x.id === card.dataset.id);
-      it.status = ST[(ST.indexOf(it.status) + 1) % ST.length];
-      save(); renderList(); renderSummary(); return;
+    const h2 = e.target.closest(".cat-h");
+    if (h2) {
+      const card = h2.closest(".catcard"), key = card.dataset.key;
+      gruposAbertos.has(key) ? gruposAbertos.delete(key) : gruposAbertos.add(key);
+      card.classList.toggle("open");
+      return;
     }
-    openSheet(card.dataset.id);
+    const row = e.target.closest(".cat-item"); if (!row) return;
+    openSheet(row.dataset.id);
   };
   $("fab").onclick = () => (view === "rec" ? openRec(null) : openSheet(null));
   document.querySelector(".nav").onclick = (e) => { const b = e.target.closest("[data-view]"); if (b) setView(b.dataset.view); };
@@ -763,6 +847,7 @@ window.FCST_SEED = {};
     document.body.classList.add("auth-locked");
     $("authGate").hidden = false;
     $("authUser").textContent = "Não conectado";
+    $("hiUser").hidden = true;
   }
   async function loadCloudState(user) {
     const { data, error } = await supabaseClient.from("finance_states").select("state").eq("user_id", user.id).maybeSingle();
@@ -778,6 +863,8 @@ window.FCST_SEED = {};
     document.body.classList.remove("auth-locked");
     $("authGate").hidden = true;
     $("authUser").textContent = user.email || user.user_metadata?.user_name || "Conta conectada";
+    const nome = primeiroNome(user);
+    if (nome) { $("hiUser").innerHTML = `Olá, <b>${esc(nome)}</b>!`; $("hiUser").hidden = false; } else { $("hiUser").hidden = true; }
     try {
       await loadCloudState(user);
       if (activeUserId !== userId) return;
