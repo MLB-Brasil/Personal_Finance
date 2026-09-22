@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#4f46e5">
+<meta name="theme-color" content="#3E7C8F">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,18 +18,18 @@
 <style>
 :root {
   --bg: #f3f4fa; --surface: #ffffff; --surface2: #eef0f8; --text: #171a2b; --muted: #6b7190; --border: #e3e6f2;
-  --accent: #4f46e5; --accent2: #7c3aed; --neg: #e5484d; --pos: #12a150; --warn: #f59e0b;
-  --p0: #e5484d; --p1: #f59e0b; --p2: #3b82f6; --p3: #94a3b8;
+  --accent: #3E7C8F; --accent2: #5C9BAE; --neg: #e5484d; --pos: #12a150; --warn: #f59e0b;
+  --st0: #e5675b; --st1: #f2a93b; --st2: #2fa774;
   --shadow: 0 6px 24px rgba(40, 45, 90, .08);
   --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
 }
 :root { color-scheme: light; }
 /* tema escuro: forçado (data-theme="dark") ou automático quando o sistema pede e não há "light" forçado */
 :root[data-theme="dark"] { color-scheme: dark; --bg: #0e1018; --surface: #171a26; --surface2: #202436; --text: #eef0fa; --muted: #98a0bf; --border: #262b3f;
-  --accent: #7c7cff; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
+  --accent: #7FC2D4; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { color-scheme: dark; --bg: #0e1018; --surface: #171a26; --surface2: #202436; --text: #eef0fa; --muted: #98a0bf; --border: #262b3f;
-    --accent: #7c7cff; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
+    --accent: #7FC2D4; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; }
@@ -64,7 +64,7 @@ button { border: 0; background: none; cursor: pointer; }
 .mrow > span { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
 .lgd { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
 .lgd i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
-.logo { width: 30px; height: 30px; display: block; flex: none; filter: drop-shadow(0 3px 8px rgba(79, 70, 229, .35)); }
+.logo { width: 30px; height: 30px; display: block; flex: none; filter: drop-shadow(0 3px 8px rgba(62, 124, 143, .35)); }
 .logo svg { width: 100%; height: 100%; display: block; }
 
 /* receitas: lista minimalista */
@@ -97,7 +97,7 @@ main { padding: 6px 16px 0; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* hero */
-.hero { border-radius: 24px; padding: 20px; color: #fff; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); box-shadow: 0 12px 30px rgba(79, 70, 229, .32); }
+.hero { border-radius: 24px; padding: 20px; color: #fff; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); box-shadow: 0 12px 30px rgba(62, 124, 143, .32); }
 .hero .lbl { font-size: 12px; opacity: .8; text-transform: uppercase; letter-spacing: .6px; }
 .hero .big { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin: 2px 0 12px; font-variant-numeric: tabular-nums; }
 .meter { height: 8px; border-radius: 6px; background: rgba(255,255,255,.25); overflow: hidden; }
@@ -105,7 +105,7 @@ main { padding: 6px 16px 0; }
 .meter.over i { background: #ffd0d2; }
 .hero .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
 .hero .row div { background: rgba(255,255,255,.14); border-radius: 14px; padding: 9px 11px; }
-.hero.green { background: linear-gradient(135deg, #0f9d58 0%, #12a150 45%, #0ea5a4 100%); box-shadow: 0 12px 30px rgba(18, 161, 80, .3); margin-bottom: 16px; }
+.hero.green { background: linear-gradient(135deg, #3a9a74 0%, #4aa982 45%, #4bb0a3 100%); box-shadow: 0 12px 30px rgba(58, 154, 116, .25); margin-bottom: 16px; }
 .hero .row span { display: block; font-size: 11px; opacity: .8; }
 .hero .row b { font-size: 15px; font-variant-numeric: tabular-nums; }
 
@@ -115,6 +115,7 @@ main { padding: 6px 16px 0; }
 .f { flex: none; display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-weight: 600; font-size: 13px; color: var(--muted); }
 .f i { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--muted)); }
 .f.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+.f .fn { font-size: 11px; font-weight: 700; opacity: .65; }
 .search { width: 100%; padding: 11px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--surface); margin-bottom: 12px; outline: none; }
 .search:focus { border-color: var(--accent); }
 
@@ -130,6 +131,7 @@ main { padding: 6px 16px 0; }
 .meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .tag { font-size: 11px; font-weight: 800; padding: 2px 7px; border-radius: 6px; color: var(--pc); background: color-mix(in srgb, var(--pc) 14%, transparent); }
 .pill { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--surface2); color: var(--muted); }
+.pill.s0 { background: color-mix(in srgb, var(--st0) 16%, transparent); color: var(--st0); }
 .pill.s1 { background: color-mix(in srgb, var(--warn) 18%, transparent); color: #b7791f; }
 .pill.s2 { background: color-mix(in srgb, var(--pos) 18%, transparent); color: var(--pos); }
 :root[data-theme="dark"] .pill.s1 { color: var(--warn); }
@@ -147,6 +149,7 @@ main { padding: 6px 16px 0; }
 .brow { display: grid; grid-template-columns: 30px 1fr auto; gap: 10px; align-items: center; margin-bottom: 10px; font-size: 13px; }
 .brow .tr { height: 10px; border-radius: 6px; background: var(--surface2); overflow: hidden; }
 .brow .tr i { display: block; height: 100%; border-radius: 6px; background: var(--c); }
+.brow.st { grid-template-columns: 92px 1fr auto; }
 .brow span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
 .stats div { background: var(--surface2); border-radius: 14px; padding: 12px 6px; }
@@ -170,7 +173,7 @@ main { padding: 6px 16px 0; }
 .nav button { flex: 1; display: grid; justify-items: center; gap: 2px; padding: 6px 0; color: var(--muted); font-size: 11px; font-weight: 600; }
 .nav button.on { color: var(--accent); }
 .nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.fab { position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(82px + var(--sab)); z-index: 21; width: 58px; height: 58px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 30px; line-height: 1; box-shadow: 0 10px 24px rgba(79, 70, 229, .45); display: grid; place-content: center; }
+.fab { position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(82px + var(--sab)); z-index: 21; width: 58px; height: 58px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 30px; line-height: 1; box-shadow: 0 10px 24px rgba(62, 124, 143, .45); display: grid; place-content: center; }
 .fab:active { transform: scale(.94); }
 
 /* folha de edição */
@@ -200,6 +203,28 @@ body.sheet-open #sheet, body.sheetr-open #sheetR, body.sheetm-open #sheetM { tra
 body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: none; }
 .account-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .account-line span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; color: var(--muted); }
+
+/* ---- Layout 7 · Blocos ---- */
+.hero { background: none; box-shadow: none; padding: 0; color: var(--text); display: grid; gap: 10px; }
+.bigtile { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 12px 30px rgba(62, 124, 143, .28); }
+.bigtile .big { margin-bottom: 12px; }
+.hero .row { margin-top: 0; gap: 10px; }
+.hero .row div { border-radius: 20px; padding: 14px; background: #E1EBFA; }
+.hero .row div:nth-child(1) { background: #DDF1E8; }
+.hero .row div:nth-child(2) { background: #E1EBFA; }
+.hero .row div:nth-child(3) { background: #FBEFD3; }
+.hero .row div:nth-child(4) { background: #E7E2F6; }
+.hero .row span { color: #55627a; opacity: 1; }
+.hero .row b { color: #1d2740; font-size: 15px; }
+.list { grid-template-columns: 1fr 1fr; gap: 10px; }
+.item { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 18px 14px 14px; border-radius: 20px; }
+.item::before { left: 0; right: 0; top: 0; bottom: auto; width: auto; height: 5px; }
+.day { width: auto; height: auto; padding: 2px 9px; border-radius: 999px; display: flex; gap: 4px; align-items: baseline; }
+.day b { font-size: 13px; } .day small { font-size: 10px; }
+.vals { text-align: left; width: 100%; margin-top: 4px; }
+.info { width: 100%; }
+.info h3 { font-size: 13.5px; -webkit-line-clamp: 2; }
+@media (max-width: 380px){ .list { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body class="auth-locked">
@@ -272,7 +297,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
       <div id="sumAno" hidden></div>
       <div id="sumMes">
       <div class="panel"><h2>Receita x despesa</h2><div id="cmp"></div></div>
-      <div class="panel"><h2>Gasto real por prioridade</h2><div id="byPri"></div></div>
+      <div class="panel"><h2>Gasto real por status</h2><div id="bySt"></div></div>
       <div class="panel"><h2>Andamento</h2><div class="stats" id="byStatus"></div></div>
       <div class="panel"><h2>Maiores gastos</h2><div class="top5" id="top5"></div></div>
       </div>
@@ -324,10 +349,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
   <div class="grab"></div>
   <h2 id="sheetTitle">Nova despesa</h2>
   <div class="field"><label for="fDesp">Despesa</label><input id="fDesp" type="text" autocomplete="off" placeholder="Ex.: MERCADO"></div>
-  <div class="two">
-    <div class="field"><label for="fDia">Vencimento (dia)</label><input id="fDia" type="number" min="1" max="31" inputmode="numeric"></div>
-    <div class="field"><label>Prioridade</label><div class="seg" id="fPri"></div></div>
-  </div>
+  <div class="field"><label for="fDia">Vencimento (dia)</label><input id="fDia" type="number" min="1" max="31" inputmode="numeric"></div>
   <div class="two">
     <div class="field"><label for="fOrc">R$ Orçado</label><input id="fOrc" type="number" step="0.01" inputmode="decimal"></div>
     <div class="field"><label for="fReal">R$ Real</label><input id="fReal" type="number" step="0.01" inputmode="decimal"></div>
@@ -360,9 +382,10 @@ window.FCST_SEED = {};
 <script>
 (() => {
   const KEY = "fcst2026.v1";
-  const PRI = ["P0", "P1", "P2", "P3"];
-  const PC = { P0: "var(--p0)", P1: "var(--p1)", P2: "var(--p2)", P3: "var(--p3)" };
   const ST = ["Não iniciada", "Em andamento", "Concluída"];
+  // Os valores gravados continuam iguais (compatível com dados e backups antigos); só o rótulo exibido muda.
+  const ST_LABEL = { "Não iniciada": "A pagar", "Em andamento": "Em andamento", "Concluída": "Pago" };
+  const SC = { "Não iniciada": "var(--st0)", "Em andamento": "var(--st1)", "Concluída": "var(--st2)" };
   const MES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
   const ANO = 2026;
   const brl = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
@@ -376,14 +399,14 @@ window.FCST_SEED = {};
 
   // Logo: monograma "P" (Personal) + moeda com seta de crescimento. Mesmo desenho do icon.svg.
   const LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
-    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4f46e5"/><stop offset="1" stop-color="#7c3aed"/></linearGradient>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3E7C8F"/><stop offset="1" stop-color="#5C9BAE"/></linearGradient>
     <linearGradient id="lc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs>
     <rect width="512" height="512" rx="116" fill="url(#lg)"/>
     <path d="M178 392V128h100a76 76 0 0 1 0 152h-100" fill="none" stroke="#fff" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
     <circle cx="352" cy="356" r="72" fill="url(#lc)" stroke="#6553e7" stroke-width="16"/>
     <path d="M321 374l22-22 16 14 26-30M367 336h18v18" fill="none" stroke="#fff" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   $("logo").innerHTML = LOGO;
-  $("authLogo").innerHTML = LOGO;
+  $("authLogo").innerHTML = LOGO.replace(/\blg\b/g, "lgA").replace(/\blc\b/g, "lcA");
   const logoUri = "data:image/svg+xml," + encodeURIComponent(LOGO);
   document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]').forEach((l) => (l.href = logoUri));
 
@@ -396,13 +419,14 @@ window.FCST_SEED = {};
   const nowKey = () => `${ANO}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
   let lastNow = nowKey();
   let cur = lastNow;
-  let recScope = "mes", sumScope = "mes", view = "list", fPri = "", q = "", editing = null, sheet = null, delArmed = false;
+  let recScope = "mes", sumScope = "mes", view = "list", fSt = "", q = "", editing = null, sheet = null, delArmed = false;
 
   // Cada mês tem `items` (despesas) e `receitas` (colunas K "Receita" e L "R$" da planilha).
   // Dados antigos tinham um único número `receita`; ele vira uma receita "Receita".
   function migrate(s) {
     for (const m of Object.values(s.months)) {
       m.items ||= [];
+      m.items.forEach((i) => { delete i.prioridade; });
       if (!Array.isArray(m.receitas)) m.receitas = m.receita > 0 ? [{ id: uid(), descricao: "Receita", valor: m.receita }] : [];
       delete m.receita;
     }
@@ -454,19 +478,20 @@ window.FCST_SEED = {};
   }
 
   function renderFilters() {
-    const opts = [["", "Todas", ""], ...PRI.map((p) => [p, p, PC[p]])];
-    $("filters").innerHTML = opts.map(([v, l, c]) => `<button class="f${fPri === v ? " on" : ""}" data-p="${v}">${c ? `<i style="--c:${c}"></i>` : ""}${l}</button>`).join("");
+    const it = M().items, n = (s) => it.filter((i) => i.status === s).length;
+    const opts = [["", "Todas", "", it.length], ...ST.map((s) => [s, ST_LABEL[s], SC[s], n(s)])];
+    $("filters").innerHTML = opts.map(([v, l, c, k]) => `<button class="f${fSt === v ? " on" : ""}" data-p="${v}">${c ? `<i style="--c:${c}"></i>` : ""}${l}<span class="fn">${k}</span></button>`).join("");
   }
 
   function renderList() {
-    const items = M().items.filter((i) => (!fPri || i.prioridade === fPri) && (!q || i.despesa.toLowerCase().includes(q))).sort((a, b) => a.dia - b.dia || a.despesa.localeCompare(b.despesa));
+    const items = M().items.filter((i) => (!fSt || i.status === fSt) && (!q || i.despesa.toLowerCase().includes(q))).sort((a, b) => a.dia - b.dia || a.despesa.localeCompare(b.despesa));
     if (!items.length) { $("list").innerHTML = `<div class="empty">${M().items.length ? "Nada encontrado." : "Nenhuma despesa neste mês.<br>Toque em + para adicionar."}</div>`; return; }
     $("list").innerHTML = items.map((i) => {
       const d = i.orcado - i.real, si = ST.indexOf(i.status);
-      return `<article class="item" data-id="${i.id}" style="--pc:${PC[i.prioridade]}">
+      return `<article class="item" data-id="${i.id}" style="--pc:${SC[i.status]}">
         <div class="day"><b>${i.dia || "–"}</b><small>dia</small></div>
         <div class="info"><h3>${esc(i.despesa || "(sem nome)")}</h3>
-          <div class="meta"><span class="tag">${i.prioridade}</span><button class="pill s${si}" data-act="st">${i.status}</button></div></div>
+          <div class="meta"><button class="pill s${si}" data-act="st">${ST_LABEL[i.status]}</button></div></div>
         <div class="vals"><b>${brl.format(i.real)}</b><small>de ${brl.format(i.orcado)}</small>${i.orcado || i.real ? `<em class="${sign(d)}">${d > 0.005 ? "+" : ""}${brl.format(d)}</em>` : ""}</div>
       </article>`;
     }).join("");
@@ -502,11 +527,11 @@ window.FCST_SEED = {};
     $("cmp").innerHTML = `<div class="brow" style="--c:var(--pos)"><b style="color:var(--pos)">Rec.</b><div class="tr"><i style="width:${(t.rec / mx) * 100}%"></i></div><span>${brl.format(t.rec)}</span></div>
       <div class="brow" style="--c:var(--neg)"><b style="color:var(--neg)">Desp.</b><div class="tr"><i style="width:${(t.r / mx) * 100}%"></i></div><span>${brl.format(t.r)}</span></div>
       <p class="note" style="margin:0">${t.rec ? `Saldo: <b class="${sign(t.saldo)}">${brl.format(t.saldo)}</b> · ${pct0.format(t.r / t.rec)} da receita comprometida` : "Cadastre as receitas do mês na aba Receitas."}</p>`;
-    const by = Object.fromEntries(PRI.map((p) => [p, 0]));
-    it.forEach((i) => (by[i.prioridade] += i.real));
+    const by = Object.fromEntries(ST.map((s) => [s, 0]));
+    it.forEach((i) => (by[i.status] += i.real));
     const max = Math.max(...Object.values(by), 1);
-    $("byPri").innerHTML = PRI.map((p) => `<div class="brow" style="--c:${PC[p]}"><b style="color:${PC[p]}">${p}</b><div class="tr"><i style="width:${(by[p] / max) * 100}%"></i></div><span>${brl.format(by[p])}${t.r ? " · " + pct0.format(by[p] / t.r) : ""}</span></div>`).join("");
-    $("byStatus").innerHTML = ST.map((s) => `<div><b>${it.filter((i) => i.status === s).length}</b><span>${s}</span></div>`).join("");
+    $("bySt").innerHTML = ST.map((s) => `<div class="brow st" style="--c:${SC[s]}"><b style="color:${SC[s]}">${ST_LABEL[s]}</b><div class="tr"><i style="width:${(by[s] / max) * 100}%"></i></div><span>${brl.format(by[s])}${t.r ? " · " + pct0.format(by[s] / t.r) : ""}</span></div>`).join("");
+    $("byStatus").innerHTML = ST.map((s) => `<div><b>${it.filter((i) => i.status === s).length}</b><span>${ST_LABEL[s]}</span></div>`).join("");
     const top = [...it].sort((a, b) => b.real - a.real).slice(0, 5).filter((i) => i.real > 0);
     $("top5").innerHTML = top.length ? top.map((i) => `<div><span>${esc(i.despesa)}</span><b>${brl.format(i.real)}</b></div>`).join("") : `<span class="note">Sem gastos ainda.</span>`;
     renderYear();
@@ -539,7 +564,7 @@ window.FCST_SEED = {};
     const used = rec ? gasto / rec : 1;
     const origens = group(rs, (r) => r.descricao.trim() || "(sem descrição)", (r) => r.valor);
     const gastos = group(is, (i) => baseName(i.despesa || "(sem nome)"), (i) => i.real);
-    const pri = PRI.map((p) => ({ p, v: sumBy(is.filter((i) => i.prioridade === p), (i) => i.real) }));
+    const pri = ST.map((s) => ({ p: s, v: sumBy(is.filter((i) => i.status === s), (i) => i.real) }));
     const months = ms.filter(([, m]) => m.receitas.length || m.items.some((i) => i.real > 0));
     const mx = Math.max(...months.map(([, m]) => Math.max(sumBy(m.receitas, (r) => r.valor), sumBy(m.items, (i) => i.real))), 1);
 
@@ -564,7 +589,7 @@ window.FCST_SEED = {};
         ${origens.length ? `<p class="note" style="margin:12px 0 0">Total: <b>${brl.format(rec)}</b> · ${origens.length} ${origens.length > 1 ? "origens" : "origem"}</p>` : ""}</div>
       <div class="panel"><h2>Gastos por nome</h2>${gastos.length ? growRows(gastos, gasto, "var(--accent)") : `<span class="note">Nenhum gasto real lançado.</span>`}
         ${gastos.length ? `<p class="note" style="margin:12px 0 0">Total: <b>${brl.format(gasto)}</b> · % sobre o gasto total. “×N” = lançamentos agrupados (parcelas como 04/05 e 05/05 contam juntas).</p>` : ""}</div>
-      <div class="panel"><h2>Gasto por prioridade</h2>${pri.map((x) => `<div class="brow" style="--c:${PC[x.p]}"><b style="color:${PC[x.p]}">${x.p}</b><div class="tr"><i style="width:${(x.v / Math.max(...pri.map((y) => y.v), 1)) * 100}%"></i></div><span>${brl.format(x.v)}${gasto ? " · " + pct0.format(x.v / gasto) : ""}</span></div>`).join("")}</div>`;
+      <div class="panel"><h2>Gasto por status</h2>${pri.map((x) => `<div class="brow st" style="--c:${SC[x.p]}"><b style="color:${SC[x.p]}">${ST_LABEL[x.p]}</b><div class="tr"><i style="width:${(x.v / Math.max(...pri.map((y) => y.v), 1)) * 100}%"></i></div><span>${brl.format(x.v)}${gasto ? " · " + pct0.format(x.v / gasto) : ""}</span></div>`).join("")}</div>`;
   }
 
   // ---------- tema ----------
@@ -607,17 +632,16 @@ window.FCST_SEED = {};
 
   // ---------- folha de edição ----------
   function segment(el, values, colors, current, onPick) {
-    el.innerHTML = values.map((v) => `<button type="button" data-v="${v}" class="${v === current ? "on" : ""}" style="--c:${colors ? colors[v] : "var(--accent)"}">${v}</button>`).join("");
+    el.innerHTML = values.map((v) => `<button type="button" data-v="${v}" class="${v === current ? "on" : ""}" style="--c:${colors ? colors[v] : "var(--accent)"}">${ST_LABEL[v] || v}</button>`).join("");
     el.onclick = (e) => { const b = e.target.closest("button"); if (!b) return; onPick(b.dataset.v); el.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b)); };
   }
   function openSheet(id) {
     editing = id; delArmed = false; $("sDel").textContent = "Excluir";
-    const i = id ? M().items.find((x) => x.id === id) : { dia: 30, despesa: "", prioridade: "P1", orcado: 0, real: 0, status: "Não iniciada", obs: "" };
+    const i = id ? M().items.find((x) => x.id === id) : { dia: 30, despesa: "", orcado: 0, real: 0, status: "Não iniciada", obs: "" };
     sheet = { ...i };
     $("sheetTitle").textContent = id ? "Editar despesa" : "Nova despesa";
     $("fDesp").value = i.despesa; $("fDia").value = i.dia || ""; $("fOrc").value = i.orcado || ""; $("fReal").value = i.real || ""; $("fObs").value = i.obs || "";
-    segment($("fPri"), PRI, PC, sheet.prioridade, (v) => (sheet.prioridade = v));
-    segment($("fSt"), ST, null, sheet.status, (v) => (sheet.status = v));
+    segment($("fSt"), ST, SC, sheet.status, (v) => (sheet.status = v));
     $("sDel").style.display = id ? "" : "none";
     document.body.classList.add("sheet-open");
     if (!id) setTimeout(() => $("fDesp").focus(), 300);
@@ -658,6 +682,7 @@ window.FCST_SEED = {};
     const name = $("fDesp").value.trim();
     if (!name) { toast("Informe o nome da despesa"); $("fDesp").focus(); return; }
     Object.assign(sheet, { despesa: name, dia: Math.min(31, Math.max(0, Math.round(num($("fDia").value)))), orcado: num($("fOrc").value), real: num($("fReal").value), obs: $("fObs").value.trim() });
+    delete sheet.prioridade;
     if (editing) Object.assign(M().items.find((x) => x.id === editing), sheet);
     else M().items.push({ ...sheet, id: uid() });
     save(); closeSheet(); renderAll(); toast("Salvo");
@@ -685,7 +710,7 @@ window.FCST_SEED = {};
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && nowKey() !== lastNow) { lastNow = nowKey(); goNow(); }
   });
-  $("filters").onclick = (e) => { const b = e.target.closest("[data-p]"); if (b) { fPri = b.dataset.p; renderFilters(); renderList(); } };
+  $("filters").onclick = (e) => { const b = e.target.closest("[data-p]"); if (b) { fSt = b.dataset.p; renderFilters(); renderList(); } };
   $("search").oninput = (e) => { q = e.target.value.trim().toLowerCase(); renderList(); };
   $("list").onclick = (e) => {
     const card = e.target.closest(".item"); if (!card) return;
@@ -716,9 +741,9 @@ window.FCST_SEED = {};
   $("exportJson").onclick = () => { download("personal-finance.json", JSON.stringify(state, null, 2), "application/json"); toast("Backup gerado"); };
   $("exportCsv").onclick = () => {
     const c = (v) => `"${String(v).replace(/"/g, '""')}"`, n = (v) => v.toFixed(2).replace(".", ",");
-    const rows = M().items.map((i) => [i.dia, c(i.despesa), i.prioridade, n(i.orcado), n(i.real), n(i.orcado - i.real), i.status, c(i.obs || "")].join(";"));
+    const rows = M().items.map((i) => [i.dia, c(i.despesa), n(i.orcado), n(i.real), n(i.orcado - i.real), ST_LABEL[i.status], c(i.obs || "")].join(";"));
     const recs = M().receitas.map((r) => [c(r.descricao), n(r.valor)].join(";"));
-    download(`personal-finance-${cur}.csv`, "﻿" + ["Vencimento;Despesa;Prioridade;Orçado;Real;Dif;Status;Observações", ...rows, "", "Receita;R$", ...recs].join("\r\n"), "text/csv;charset=utf-8");
+    download(`personal-finance-${cur}.csv`, "﻿" + ["Vencimento;Despesa;Orçado;Real;Dif;Status;Observações", ...rows, "", "Receita;R$", ...recs].join("\r\n"), "text/csv;charset=utf-8");
     toast("CSV gerado");
   };
   $("importJson").onchange = async (e) => {
@@ -789,6 +814,15 @@ window.FCST_SEED = {};
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
   applyTheme(); showSum(); renderAll(); setView("list"); bootAuth();
+})();
+</script>
+<script>
+(function(){
+  document.querySelectorAll(".hero").forEach(function(hero){
+    var big = document.createElement("div"); big.className = "bigtile";
+    [".lbl", ".big", ".meter"].forEach(function(sel){ var el = hero.querySelector(sel); if (el) big.appendChild(el); });
+    hero.prepend(big);
+  });
 })();
 </script>
 </body>
