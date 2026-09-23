@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#8B7FD9">
+<meta name="theme-color" content="#5B4FBE">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,7 +18,7 @@
 <style>
 :root {
   --bg: #f3f4fa; --surface: #ffffff; --surface2: #eef0f8; --text: #171a2b; --muted: #6b7190; --border: #e3e6f2;
-  --accent: #8B7FD9; --accent2: #A597E8; --neg: #e5484d; --pos: #12a150; --warn: #f59e0b;
+  --accent: #5B4FBE; --accent2: #7A6FD9; --neg: #e5484d; --pos: #12a150; --warn: #f59e0b;
   --st0: #e5675b; --st1: #f2a93b; --st2: #2fa774;
   --shadow: 0 6px 24px rgba(40, 45, 90, .08);
   --sat: env(safe-area-inset-top, 0px); --sab: env(safe-area-inset-bottom, 0px);
@@ -26,10 +26,10 @@
 :root { color-scheme: light; }
 /* tema escuro: forçado (data-theme="dark") ou automático quando o sistema pede e não há "light" forçado */
 :root[data-theme="dark"] { color-scheme: dark; --bg: #0e1018; --surface: #171a26; --surface2: #202436; --text: #eef0fa; --muted: #98a0bf; --border: #262b3f;
-  --accent: #B9AEFF; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
+  --accent: #ADA1F5; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { color-scheme: dark; --bg: #0e1018; --surface: #171a26; --surface2: #202436; --text: #eef0fa; --muted: #98a0bf; --border: #262b3f;
-    --accent: #B9AEFF; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
+    --accent: #ADA1F5; --neg: #ff6b70; --pos: #34d17f; --shadow: 0 6px 24px rgba(0,0,0,.35); }
 }
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; }
@@ -64,7 +64,7 @@ button { border: 0; background: none; cursor: pointer; }
 .mrow > span { text-align: right; font-variant-numeric: tabular-nums; font-weight: 700; }
 .lgd { display: flex; gap: 14px; font-size: 11px; color: var(--muted); margin-bottom: 10px; }
 .lgd i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
-.logo { width: 44px; height: 44px; display: block; flex: none; filter: drop-shadow(0 4px 12px rgba(139, 127, 217, .45)); }
+.logo { width: 44px; height: 44px; display: block; flex: none; filter: drop-shadow(0 4px 12px rgba(91, 79, 190, .45)); }
 .logo svg { width: 100%; height: 100%; display: block; }
 
 /* receitas: lista minimalista */
@@ -97,7 +97,7 @@ main { padding: 6px 16px 0; }
 @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* hero */
-.hero { border-radius: 24px; padding: 20px; color: #fff; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); box-shadow: 0 12px 30px rgba(139, 127, 217, .32); }
+.hero { border-radius: 24px; padding: 20px; color: #fff; background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%); box-shadow: 0 12px 30px rgba(91, 79, 190, .32); }
 .hero .lbl { font-size: 12px; opacity: .8; text-transform: uppercase; letter-spacing: .6px; }
 .hero .big { font-size: 34px; font-weight: 800; letter-spacing: -1px; margin: 2px 0 12px; font-variant-numeric: tabular-nums; }
 .meter { height: 8px; border-radius: 6px; background: rgba(255,255,255,.25); overflow: hidden; }
@@ -173,14 +173,14 @@ main { padding: 6px 16px 0; }
 .nav button { flex: 1; display: grid; justify-items: center; gap: 2px; padding: 6px 0; color: var(--muted); font-size: 11px; font-weight: 600; }
 .nav button.on { color: var(--accent); }
 .nav svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.fab { position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(82px + var(--sab)); z-index: 21; width: 58px; height: 58px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 30px; line-height: 1; box-shadow: 0 10px 24px rgba(139, 127, 217, .45); display: grid; place-content: center; }
+.fab { position: fixed; right: max(16px, calc(50% - 264px)); bottom: calc(82px + var(--sab)); z-index: 21; width: 58px; height: 58px; border-radius: 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; font-size: 30px; line-height: 1; box-shadow: 0 10px 24px rgba(91, 79, 190, .45); display: grid; place-content: center; }
 .fab:active { transform: scale(.94); }
 
 /* folha de edição */
 .scrim { position: fixed; inset: 0; z-index: 30; background: rgba(8, 10, 24, .5); opacity: 0; pointer-events: none; transition: opacity .2s; }
 .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; max-width: 560px; margin: 0 auto; max-height: 92%; overflow-y: auto; background: var(--surface); border-radius: 26px 26px 0 0; padding: 10px 18px calc(var(--sab) + 18px); transform: translateY(105%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
-body.sheet-open .scrim, body.sheetr-open .scrim, body.sheetm-open .scrim { opacity: 1; pointer-events: auto; }
-body.sheet-open #sheet, body.sheetr-open #sheetR, body.sheetm-open #sheetM { transform: none; }
+body.sheet-open .scrim, body.sheetr-open .scrim, body.sheetm-open .scrim, body.sheetl-open .scrim { opacity: 1; pointer-events: auto; }
+body.sheet-open #sheet, body.sheetr-open #sheetR, body.sheetm-open #sheetM, body.sheetl-open #sheetL { transform: none; }
 .grab { width: 40px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto 12px; }
 .sheet h2 { margin: 0 0 14px; font-size: 18px; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -206,7 +206,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 
 /* ---- Layout 7 · Blocos ---- */
 .hero { background: none; box-shadow: none; padding: 0; color: var(--text); display: grid; gap: 10px; }
-.bigtile { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 12px 30px rgba(139, 127, 217, .28); }
+.bigtile { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 12px 30px rgba(91, 79, 190, .28); }
 .bigtile .big { margin-bottom: 12px; }
 .hero .row { margin-top: 0; gap: 10px; }
 .hero .row div { border-radius: 20px; padding: 14px; background: #E1EBFA; }
@@ -256,6 +256,8 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 .cat-item .cd { width: 30px; font-size: 12px; color: var(--muted); flex: none; }
 .cat-item .ci-pill { flex: 1; }
 .cat-item b { font-variant-numeric: tabular-nums; font-size: 13.5px; flex: none; }
+.cat-add { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 11px 16px; border-top: 1px solid var(--border); color: var(--accent); font-weight: 700; font-size: 13px; }
+.cat-add svg { width: 16px; height: 16px; flex: none; }
 </style>
 </head>
 <body class="auth-locked">
@@ -409,6 +411,13 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
   <button class="btn primary" id="rSave">Salvar</button>
   <button class="btn danger" id="rDel">Excluir</button>
 </div>
+<div class="sheet" id="sheetL" role="dialog" aria-modal="true" aria-labelledby="sheetLTitle">
+  <div class="grab"></div>
+  <h2 id="sheetLTitle">Lançar despesa</h2>
+  <div class="field"><label for="lData">Data</label><input id="lData" type="date"></div>
+  <div class="field"><label for="lVal">R$ Valor</label><input id="lVal" type="number" step="0.01" inputmode="decimal" placeholder="0,00"></div>
+  <button class="btn primary" id="lSave">Salvar</button>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -435,7 +444,7 @@ window.FCST_SEED = {};
 
   // Logo: monograma "P" (Personal) + moeda com seta de crescimento. Mesmo desenho do icon.svg.
   const LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
-    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B7FD9"/><stop offset="1" stop-color="#A597E8"/></linearGradient>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5B4FBE"/><stop offset="1" stop-color="#7A6FD9"/></linearGradient>
     <linearGradient id="lc" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5eead4"/><stop offset="1" stop-color="#10b981"/></linearGradient></defs>
     <rect width="512" height="512" rx="116" fill="url(#lg)"/>
     <path d="M178 392V128h100a76 76 0 0 1 0 152h-100" fill="none" stroke="#fff" stroke-width="54" stroke-linecap="round" stroke-linejoin="round"/>
@@ -553,7 +562,7 @@ window.FCST_SEED = {};
         <div class="cat-body">${g.itens.map((i) => {
           const si = ST.indexOf(i.status);
           return `<div class="cat-item" data-id="${i.id}"><span class="cd">dia ${i.dia || "–"}</span><span class="ci-pill pill s${si}">${ST_LABEL[i.status]}</span><b>${brl.format(i.real)}</b></div>`;
-        }).join("")}</div>
+        }).join("")}<button type="button" class="cat-add" data-label="${esc(g.label)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Lançar despesa</button></div>
       </div>`;
     }).join("");
   }
@@ -728,10 +737,11 @@ window.FCST_SEED = {};
     document.body.classList.add("sheet-open");
     if (!id) setTimeout(() => $("fDesp").focus(), 300);
   }
-  const closeSheet = () => document.body.classList.remove("sheet-open", "sheetr-open", "sheetm-open");
+  const closeSheet = () => document.body.classList.remove("sheet-open", "sheetr-open", "sheetm-open", "sheetl-open");
 
   // ---------- folha de receita ----------
   let recEditing = null, recArmed = false;
+  let lancCategoria = null;
   function openRec(id) {
     recEditing = id; recArmed = false; $("rDel").textContent = "Excluir";
     const r = id ? M().receitas.find((x) => x.id === id) : { descricao: "", valor: 0 };
@@ -753,6 +763,32 @@ window.FCST_SEED = {};
     M().receitas = M().receitas.filter((x) => x.id !== recEditing);
     save(); closeSheet(); renderAll(); toast("Receita excluída");
   };
+  // ---------- lançar despesa numa categoria já existente ----------
+  function toDateInputValue(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  }
+  function openLancamento(categoria) {
+    lancCategoria = categoria;
+    $("sheetLTitle").textContent = `Lançar despesa · ${categoria}`;
+    $("lData").value = toDateInputValue(new Date());
+    $("lVal").value = "";
+    document.body.classList.add("sheetl-open");
+    setTimeout(() => $("lVal").focus(), 300);
+  }
+  $("lSave").onclick = () => {
+    const dataVal = $("lData").value, valor = num($("lVal").value);
+    if (!dataVal) { toast("Informe a data"); return; }
+    if (!valor) { toast("Informe o valor"); $("lVal").focus(); return; }
+    const [ano, mes, dia] = dataVal.split("-").map(Number);
+    const chave = `${ano}-${String(mes).padStart(2, "0")}`;
+    state.months[chave] ||= { receitas: [], items: [] };
+    state.months[chave].items.push({ id: uid(), despesa: lancCategoria, dia, orcado: valor, real: valor, status: "Concluída", obs: "" });
+    const mudouMes = chave !== cur;
+    if (mudouMes) cur = chave;
+    save(); closeSheet(); renderAll();
+    toast(mudouMes ? `Lançado em ${MES[mes - 1]}/${ano}` : "Despesa lançada");
+  };
+
   $("recList").onclick = (e) => {
     const c = e.target.closest("[data-rid]"); if (!c) return;
     if (c.dataset.m !== cur) { cur = c.dataset.m; renderAll(); }
@@ -802,6 +838,8 @@ window.FCST_SEED = {};
       card.classList.toggle("open");
       return;
     }
+    const add = e.target.closest(".cat-add");
+    if (add) { openLancamento(add.dataset.label); return; }
     const row = e.target.closest(".cat-item"); if (!row) return;
     openSheet(row.dataset.id);
   };
