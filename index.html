@@ -179,8 +179,8 @@ main { padding: 6px 16px 0; }
 /* folha de edição */
 .scrim { position: fixed; inset: 0; z-index: 30; background: rgba(8, 10, 24, .5); opacity: 0; pointer-events: none; transition: opacity .2s; }
 .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; max-width: 560px; margin: 0 auto; max-height: 92%; overflow-y: auto; background: var(--surface); border-radius: 26px 26px 0 0; padding: 10px 18px calc(var(--sab) + 18px); transform: translateY(105%); transition: transform .28s cubic-bezier(.2,.8,.2,1); }
-body.sheet-open .scrim, body.sheetr-open .scrim, body.sheetm-open .scrim, body.sheetl-open .scrim { opacity: 1; pointer-events: auto; }
-body.sheet-open #sheet, body.sheetr-open #sheetR, body.sheetm-open #sheetM, body.sheetl-open #sheetL { transform: none; }
+body.sheet-open .scrim, body.sheetr-open .scrim, body.sheetm-open .scrim, body.sheetl-open .scrim, body.sheetn-open .scrim { opacity: 1; pointer-events: auto; }
+body.sheet-open #sheet, body.sheetr-open #sheetR, body.sheetm-open #sheetM, body.sheetl-open #sheetL, body.sheetn-open #sheetN { transform: none; }
 .grab { width: 40px; height: 5px; border-radius: 3px; background: var(--border); margin: 0 auto 12px; }
 .sheet h2 { margin: 0 0 14px; font-size: 18px; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -291,6 +291,108 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 :root[data-theme="dark"] .duepill.perto { color: var(--warn); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .duepill.perto { color: var(--warn); } }
 
+/* ---- Valores do card: orçado em destaque, real e diferença ---- */
+.cat-h { position: relative; }
+.cat-h .cv { align-items: flex-end; }
+.cat-h .cv > svg { position: absolute; top: 16px; right: 12px; } /* seta no canto: sobra a largura toda para os valores */
+@media (max-width: 899px) {
+  .cat-h { padding-inline: 12px; }
+  .v3 b.vo { font-size: 14px; letter-spacing: -.4px; } .v3 b { font-size: 12px; padding-left: 6px; } .v3 span { font-size: 10px; }
+}
+.v3 { flex: 1; display: grid; grid-template-columns: auto 1fr; gap: 3px 0; align-items: baseline; font-variant-numeric: tabular-nums; }
+.v3 span { font-size: 11px; color: var(--muted); font-weight: 600; text-align: left; }
+.v3 b { text-align: right; font-size: 13px; font-weight: 650; padding-left: 8px; }
+.v3 b.vo { font-size: 16.5px; font-weight: 800; letter-spacing: -.3px; }
+.v3 .dif { padding-top: 3px; border-top: 1px dashed var(--border); }
+.hsub { font-size: 12.5px; margin-top: 10px; opacity: .9; }
+
+/* ---- Resumo: gráficos ----
+   Cores de série validadas (claro e escuro): receita = verde, gasto = roxo. Status usa as cores de status. */
+:root { --c-rec: #12a150; --c-gas: #5B4FBE; }
+:root[data-theme="dark"] { --c-rec: #1f9e5c; --c-gas: #8676e8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --c-rec: #1f9e5c; --c-gas: #8676e8; } }
+.kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+.kpi { background: var(--surface); border-radius: 18px; padding: 14px; box-shadow: var(--shadow); min-width: 0; }
+.kpi > span { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); font-weight: 650; }
+.kpi > span i { width: 9px; height: 9px; border-radius: 3px; flex: none; }
+.kpi b { display: block; font-size: 19px; font-weight: 800; letter-spacing: -.4px; margin: 4px 0 2px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi small { font-size: 11px; color: var(--muted); }
+.sgrid .panel h2 { margin-bottom: 4px; }
+.sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
+.lg { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 11.5px; color: var(--muted); margin: 0 0 12px; }
+.lg i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.lg i.tk { width: 14px; height: 0; border-top: 2px dashed var(--muted); border-radius: 0; vertical-align: 3px; }
+[data-w] { transition: width .7s cubic-bezier(.2,.8,.2,1); }
+[data-h] { transition: height .7s cubic-bezier(.2,.8,.2,1); }
+[data-tip] { cursor: pointer; }
+/* orçado x real (bullet) */
+.bl { display: grid; grid-template-columns: minmax(84px, 32%) 1fr; column-gap: 12px; align-items: center; padding: 7px 6px; margin: 0 -6px; border-radius: 10px; }
+.bl:hover { background: var(--surface2); }
+.bl .nm { grid-row: span 2; font-size: 12.5px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bl .bt { position: relative; height: 12px; }
+.bl .bt i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; }
+.bl .bt .o { background: color-mix(in srgb, var(--c-gas) 20%, transparent); }
+.bl .bt .r { top: 3px; bottom: 3px; background: var(--c-gas); border-radius: 3px; }
+.bl .bt .r.over { background: var(--neg); }
+.bl .vv { font-size: 11px; color: var(--muted); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.bl .vv em { font-style: normal; font-weight: 700; }
+/* situação das contas (rosca) */
+.dn { display: flex; align-items: center; gap: 18px; }
+.dn .ring { position: relative; width: 128px; height: 128px; flex: none; }
+.dn svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.dn circle { fill: none; stroke-width: 6; transition: stroke-width .15s; }
+.dn circle.bg { stroke: var(--surface2); }
+.dn circle[data-tip]:hover { stroke-width: 7.5; }
+.dn .ctr { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
+.dn .ctr b { font-size: 22px; font-weight: 800; line-height: 1.1; }
+.dn .ctr small { font-size: 11px; color: var(--muted); }
+.dn .leg { flex: 1; display: grid; gap: 10px; min-width: 0; font-size: 12.5px; }
+.dn .leg > div { display: grid; grid-template-columns: 10px 1fr auto; gap: 2px 8px; align-items: center; }
+.dn .leg i { width: 10px; height: 10px; border-radius: 50%; }
+.dn .leg b { font-variant-numeric: tabular-nums; }
+.dn .leg small { grid-column: 2 / -1; color: var(--muted); font-size: 11px; }
+.pop { animation: pop .8s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes pop { from { opacity: 0; transform: rotate(-200deg) scale(.7); } }
+/* vencimentos do mês */
+.vc .cols { display: flex; gap: 2px; height: 130px; border-bottom: 1px solid var(--border); }
+.vc .dc { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; border-radius: 4px 4px 0 0; min-width: 0; }
+.vc .dc[data-tip]:hover { background: var(--surface2); }
+.vc .dc.hoje { background: color-mix(in srgb, var(--accent) 10%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent); }
+.vc .dc i { display: block; border-radius: 3px 3px 1px 1px; }
+.vc .dc i.pg { background: var(--st2); } .vc .dc i.pend { background: var(--c-gas); } .vc .dc i.venc { background: var(--neg); }
+.vc .ax { position: relative; height: 18px; font-size: 10.5px; color: var(--muted); }
+.vc .ax span { position: absolute; top: 4px; transform: translateX(-50%); }
+.vc .ax span.hj { color: var(--accent); font-weight: 800; }
+.vc .next { font-size: 12.5px; margin: 8px 0 0; }
+/* mês a mês (ano) */
+.mm .cols { display: flex; gap: 4px; height: 170px; border-bottom: 1px solid var(--border); }
+.mm .mg { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 2px; position: relative; border-radius: 6px 6px 0 0; min-width: 0; }
+.mm .mg:hover { background: var(--surface2); }
+.mm .mg i { width: 36%; max-width: 16px; border-radius: 4px 4px 0 0; display: block; }
+.mm .mg i.rc { background: var(--c-rec); } .mm .mg i.gs { background: var(--c-gas); }
+.mm .mg .ot { position: absolute; left: 10%; right: 10%; border-top: 2px dashed var(--muted); }
+.mm .ax { display: flex; gap: 4px; font-size: 10.5px; color: var(--muted); margin-top: 5px; }
+.mm .ax span { flex: 1; text-align: center; } .mm .ax span.cur { color: var(--text); font-weight: 800; }
+/* saldo acumulado (linha) */
+.lc { position: relative; height: 170px; margin-bottom: 22px; }
+.lc svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.lc .ln { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.lc .z { stroke: var(--muted); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 4 4; opacity: .6; }
+.lc .hits { position: absolute; inset: 0; display: flex; }
+.lc .hits > div { flex: 1; position: relative; }
+.lc .hits > div::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px dashed var(--muted); opacity: 0; }
+.lc .hits > div[data-tip]:hover::before { opacity: .6; }
+.lc .hits > div > span { position: absolute; bottom: -20px; left: 0; right: 0; text-align: center; font-size: 10.5px; color: var(--muted); }
+.lc .pt { position: absolute; left: 50%; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); transform: translate(-50%, -50%); transition: width .12s, height .12s; }
+.lc .hits > div:hover .pt { width: 13px; height: 13px; }
+.reveal { animation: reveal 1.1s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes reveal { from { clip-path: inset(-30px 100% -30px -12px); } to { clip-path: inset(-30px -12px -30px -12px); } }
+/* dica flutuante dos gráficos */
+.ctip { position: fixed; z-index: 50; pointer-events: none; background: var(--text); color: var(--bg); font-size: 12px; line-height: 1.5; padding: 8px 11px; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,.22); opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; max-width: 260px; }
+.ctip.on { opacity: 1; transform: none; }
+.ctip b { display: block; margin-bottom: 2px; }
+.sgrid .panel { margin-bottom: 14px; }
+
 /* ---- Computador / notebook (≥ 900px) ----
    Celular continua igual. No computador: menu lateral no lugar da barra inferior, conteúdo largo,
    cards em mais colunas, painéis lado a lado e as folhas de edição viram janelas centralizadas. */
@@ -329,9 +431,11 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
   #v-rec .seg.scope { max-width: 360px; }
 
   /* resumo e ajustes: painéis em duas colunas */
-  #sumMes, #sumAno:not([hidden]) { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
-  #sumMes .panel, #sumAno .panel { margin: 0 !important; }
-  #sumAno > .hero { grid-column: 1 / -1; }
+  .kpis { grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .sgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .sgrid .panel { margin: 0; }
+  .sgrid .wide { grid-column: 1 / -1; }
+  .bl { grid-template-columns: 200px 1fr; }
   #v-sum .seg.scope { max-width: 360px; }
   #v-set.on { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
   #v-set .panel { margin: 0; }
@@ -339,7 +443,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
   /* folhas de edição → janelas centralizadas */
   .sheet { left: 50%; right: auto; top: 50%; bottom: auto; width: min(480px, 92vw); max-height: 86vh; margin: 0; border-radius: 24px; padding: 22px 24px;
     transform: translate(-50%, -46%); opacity: 0; visibility: hidden; transition: opacity .18s, transform .18s, visibility .18s; box-shadow: 0 24px 60px rgba(0, 0, 0, .25); }
-  body.sheet-open #sheet, body.sheetr-open #sheetR, body.sheetm-open #sheetM, body.sheetl-open #sheetL { transform: translate(-50%, -50%); opacity: 1; visibility: visible; }
+  body.sheet-open #sheet, body.sheetr-open #sheetR, body.sheetm-open #sheetM, body.sheetl-open #sheetL, body.sheetn-open #sheetN { transform: translate(-50%, -50%); opacity: 1; visibility: visible; }
   .grab { display: none; }
   .toast { bottom: 40px; }
 }
@@ -376,12 +480,13 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
     <!-- DESPESAS -->
     <section class="view on" id="v-list">
       <div class="hero">
-        <div class="lbl">Gasto real no mês</div>
-        <div class="big" id="hReal">R$ 0,00</div>
+        <div class="lbl">Orçado no mês</div>
+        <div class="big" id="hOrc">R$ 0,00</div>
         <div class="meter" id="hMeter"><i style="width:0"></i></div>
+        <div class="hsub" id="hSub"></div>
         <div class="row">
           <div><span>Receita</span><b id="hRec">R$ 0,00</b></div>
-          <div><span>Orçado</span><b id="hOrc">R$ 0,00</b></div>
+          <div><span>Gasto real</span><b id="hReal">R$ 0,00</b></div>
           <div><span>Diferença (orçado − real)</span><b id="hDif">R$ 0,00</b></div>
           <div><span>Saldo (receita − real)</span><b id="hSaldo">—</b></div>
         </div>
@@ -420,12 +525,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
         <button type="button" data-s="ano">Ano 2026</button>
       </div>
       <div id="sumAno" hidden></div>
-      <div id="sumMes">
-      <div class="panel"><h2>Receita x despesa</h2><div id="cmp"></div></div>
-      <div class="panel"><h2>Gasto real por status</h2><div id="bySt"></div></div>
-      <div class="panel"><h2>Andamento</h2><div class="stats" id="byStatus"></div></div>
-      <div class="panel"><h2>Maiores gastos</h2><div class="top5" id="top5"></div></div>
-      </div>
+      <div id="sumMes"></div>
     </section>
 
     <!-- AJUSTES -->
@@ -516,6 +616,13 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
   <div class="field"><label for="lData">Data</label><input id="lData" type="date"></div>
   <div class="field"><label for="lVal">R$ Valor</label><input id="lVal" type="number" step="0.01" inputmode="decimal" placeholder="0,00"></div>
   <button class="btn primary" id="lSave">Salvar</button>
+</div>
+<div class="sheet" id="sheetN" role="dialog" aria-modal="true" aria-labelledby="sheetNTitle">
+  <div class="grab"></div>
+  <h2 id="sheetNTitle">Ativar lembretes de vencimento?</h2>
+  <p class="note" style="margin:0 0 16px; font-size:14px">Novidade: o app pode avisar quando uma conta estiver perto de vencer e também no dia do vencimento. Dá para mudar depois em Ajustes.</p>
+  <button class="btn primary" id="nYes" type="button">Ativar notificações</button>
+  <button class="btn" id="nNo" type="button">Agora não</button>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -664,10 +771,11 @@ window.FCST_SEED = {};
 
   function renderHero() {
     const t = totals();
-    $("hReal").textContent = brl.format(t.r);
+    $("hReal").textContent = rv(t.r);
     $("hRec").textContent = rv(t.rec);
-    $("hOrc").textContent = brl.format(t.o);
-    $("hDif").textContent = brl.format(t.d);
+    $("hOrc").textContent = rv(t.o);
+    $("hDif").textContent = rv(t.d);
+    $("hSub").textContent = t.o ? `${rv(t.r)} gastos · ${pct0.format(t.r / t.o)} do orçado` : "Nenhum valor orçado neste mês";
     $("hSaldo").textContent = t.rec ? rv(t.saldo) : "—";
     const used = t.o ? t.r / t.o : (t.r ? 1 : 0);
     $("hMeter").classList.toggle("over", used > 1);
@@ -712,12 +820,12 @@ window.FCST_SEED = {};
       return `<div class="catcard${aberto ? " open" : ""}" data-key="${esc(g.key)}">
         <div class="cat-h">
           ${box}${selo ? `<span class="duepill ${di.c}">${selo}</span>` : ""}
-          <div class="ct"><h3>${esc(g.label)}</h3><small>${g.itens.length} lançamento${g.itens.length > 1 ? "s" : ""} · de ${brl.format(g.orcado)}</small></div>
-          <div class="cv"><b>${brl.format(g.real)}</b><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
+          <div class="ct"><h3>${esc(g.label)}</h3><small>${g.itens.length} lançamento${g.itens.length > 1 ? "s" : ""}</small></div>
+          <div class="cv"><div class="v3"><span>Orçado</span><b class="vo">${rv(g.orcado)}</b><span>Real</span><b>${rv(g.real)}</b><span class="dif">Diferença</span><b class="dif ${ocultarRec ? "" : sign(g.orcado - g.real)}">${rv(g.orcado - g.real)}</b></div><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
         </div>
         <div class="cat-body">${g.itens.map((i) => {
           const si = ST.indexOf(i.status), d = pago(i) ? null : dueInfo(cur, i);
-          return `<div class="cat-item" data-id="${i.id}"><span class="cd${d && d.c ? ` due ${d.c}` : ""}"${d ? ` title="${d.t}"` : ""}>dia ${i.dia || "–"}</span><span class="ci-pill pill s${si}">${ST_LABEL[i.status]}</span><b>${brl.format(i.real)}</b></div>`;
+          return `<div class="cat-item" data-id="${i.id}"><span class="cd${d && d.c ? ` due ${d.c}` : ""}"${d ? ` title="${d.t}"` : ""}>dia ${i.dia || "–"}</span><span class="ci-pill pill s${si}">${ST_LABEL[i.status]}</span><b>${rv(i.real)}</b></div>`;
         }).join("")}<button type="button" class="cat-add" data-label="${esc(g.label)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Lançar despesa</button></div>
       </div>`;
     }).join("");
@@ -741,13 +849,13 @@ window.FCST_SEED = {};
       const domin = ST.reduce((a, b) => (by[a] >= by[b] ? a : b));
       ring.dataset.t = by[domin] ? `${Math.round((by[domin] / total) * 100)}%\n${ST_LABEL[domin]}` : "";
     }
-    $("donutLeg").innerHTML = ST.map((s) => `<div><span><i style="background:${SC[s]}"></i>${ST_LABEL[s]}</span><b>${brl.format(by[s])}</b></div>`).join("");
+    $("donutLeg").innerHTML = ST.map((s) => `<div><span><i style="background:${SC[s]}"></i>${ST_LABEL[s]}</span><b>${rv(by[s])}</b></div>`).join("");
   }
 
   function renderRec() {
     const t = totals(), rs = M().receitas;
     $("rTotal").textContent = rv(t.rec);
-    $("rReal").textContent = brl.format(t.r);
+    $("rReal").textContent = rv(t.r);
     $("rSaldo").textContent = rv(t.saldo);
     const used = t.rec ? t.r / t.rec : (t.r ? 1 : 0);
     $("rMeter").classList.toggle("over", used > 1);
@@ -768,21 +876,118 @@ window.FCST_SEED = {};
     $("recList").innerHTML = html;
   }
 
+  // ---------- resumo: gráficos ----------
+  // HTML/SVG leve, sem biblioteca: barras crescem ao abrir a aba e cada marca tem uma dica (data-tip)
+  // ao passar o mouse ou tocar. Valores passam por rv(), então o "ocultar valores" vale aqui também.
+  const tipAttr = (html) => ` data-tip="${esc(html)}"`;
+  const kpi = (label, val, sub, cor) => `<div class="kpi"><span>${cor ? `<i style="background:${cor}"></i>` : ""}${label}</span><b>${val}</b><small>${sub || "&nbsp;"}</small></div>`;
+  const semSinal = (v) => (ocultarRec ? "" : sign(v));
+
   function renderSummary() {
-    const it = M().items, t = totals();
-    const mx = Math.max(t.rec, t.r, 1);
-    $("cmp").innerHTML = `<div class="brow" style="--c:var(--pos)"><b style="color:var(--pos)">Rec.</b><div class="tr"><i style="width:${(t.rec / mx) * 100}%"></i></div><span>${rv(t.rec)}</span></div>
-      <div class="brow" style="--c:var(--neg)"><b style="color:var(--neg)">Desp.</b><div class="tr"><i style="width:${(t.r / mx) * 100}%"></i></div><span>${brl.format(t.r)}</span></div>
-      <p class="note" style="margin:0">${t.rec ? `Saldo: <b class="${sign(t.saldo)}">${rv(t.saldo)}</b> · ${pct0.format(t.r / t.rec)} da receita comprometida` : "Cadastre as receitas do mês na aba Receitas."}</p>`;
-    const by = Object.fromEntries(ST.map((s) => [s, 0]));
-    it.forEach((i) => (by[i.status] += i.real));
-    const max = Math.max(...Object.values(by), 1);
-    $("bySt").innerHTML = ST.map((s) => `<div class="brow st" style="--c:${SC[s]}"><b style="color:${SC[s]}">${ST_LABEL[s]}</b><div class="tr"><i style="width:${(by[s] / max) * 100}%"></i></div><span>${brl.format(by[s])}${t.r ? " · " + pct0.format(by[s] / t.r) : ""}</span></div>`).join("");
-    $("byStatus").innerHTML = ST.map((s) => `<div><b>${it.filter((i) => i.status === s).length}</b><span>${ST_LABEL[s]}</span></div>`).join("");
-    const top = [...it].sort((a, b) => b.real - a.real).slice(0, 5).filter((i) => i.real > 0);
-    $("top5").innerHTML = top.length ? top.map((i) => `<div><span>${esc(i.despesa)}</span><b>${brl.format(i.real)}</b></div>`).join("") : `<span class="note">Sem gastos ainda.</span>`;
+    const it = M().items, t = totals(), mes = MES[mIdx()];
+
+    // 1) números do mês
+    const kpis = `<div class="kpis">
+      ${kpi("Receita", rv(t.rec), `${M().receitas.length} lançamento${M().receitas.length === 1 ? "" : "s"}`, "var(--c-rec)")}
+      ${kpi("Orçado", rv(t.o), `${it.length} despesa${it.length === 1 ? "" : "s"}`)}
+      ${kpi("Gasto real", rv(t.r), t.o ? `${pct0.format(t.r / t.o)} do orçado` : "", "var(--c-gas)")}
+      ${kpi("Saldo", `<span class="${semSinal(t.saldo)}">${t.rec ? rv(t.saldo) : "—"}</span>`, t.rec ? `${pct0.format(t.r / t.rec)} da receita gasta` : "sem receita no mês")}
+    </div>`;
+
+    // 2) orçado x real por despesa (agrupa parcelas; 8 maiores + "Outras")
+    const mapa = new Map();
+    it.forEach((i) => { const l = baseName(i.despesa || "(sem nome)"), k = l.toUpperCase(), g = mapa.get(k) || { label: l, o: 0, r: 0 }; g.o += i.orcado; g.r += i.real; mapa.set(k, g); });
+    const grupos = [...mapa.values()].sort((a, b) => b.o - a.o || b.r - a.r), topG = grupos.slice(0, 8);
+    if (grupos.length > 8) { const resto = grupos.slice(8); topG.push({ label: `Outras (${resto.length})`, o: sumBy(resto, (x) => x.o), r: sumBy(resto, (x) => x.r) }); }
+    const bmax = Math.max(...topG.map((g) => Math.max(g.o, g.r)), 1);
+    const bullets = topG.length ? topG.map((g, n) => {
+      const d = g.o - g.r, over = g.r > g.o + 0.005;
+      return `<div class="bl"${tipAttr(`<b>${esc(g.label)}</b>Orçado: ${rv(g.o)}<br>Real: ${rv(g.r)}<br>Diferença: ${rv(d)}`)}><span class="nm">${esc(g.label)}</span>
+        <div class="bt"><i class="o" data-w="${(g.o / bmax) * 100}"></i><i class="r${over ? " over" : ""}" data-w="${(g.r / bmax) * 100}" style="transition-delay:${n * 40}ms"></i></div>
+        <span class="vv">${rv(g.r)} de ${rv(g.o)}${over ? ` · <em class="neg">passou ${rv(-d)}</em>` : ""}</span></div>`;
+    }).join("") : `<p class="note">Nenhuma despesa em ${mes}.</p>`;
+
+    // 3) situação das contas pelo valor orçado (rosca)
+    const bySt = ST.map((s) => { const l = it.filter((i) => i.status === s); return { s, v: sumBy(l, (i) => i.orcado), n: l.length }; });
+    const totO = sumBy(bySt, (x) => x.v), vis = bySt.filter((x) => x.v > 0), gap = vis.length > 1 ? 1.4 : 0;
+    let acc = 0;
+    const segs = vis.map((x) => {
+      const p = (x.v / totO) * 100, len = Math.max(p - gap, 0.5);
+      const c = `<circle r="15.915" cx="21" cy="21" pathLength="100" stroke="${SC[x.s]}" stroke-dasharray="${len} ${100 - len}" stroke-dashoffset="${-acc}"${tipAttr(`<b>${ST_LABEL[x.s]}</b>${x.n} conta${x.n === 1 ? "" : "s"} · ${rv(x.v)} · ${pct0.format(x.v / totO)}`)}/>`;
+      acc += p; return c;
+    }).join("");
+    const pagoPct = totO ? bySt[2].v / totO : 0;
+    const donut = it.length ? `<div class="dn"><div class="ring"><svg viewBox="0 0 42 42" class="pop"><circle class="bg" r="15.915" cx="21" cy="21"/>${segs}</svg>
+        <div class="ctr"><b>${pct0.format(pagoPct)}</b><small>pago</small></div></div>
+        <div class="leg">${bySt.map((x) => `<div><i style="background:${SC[x.s]}"></i><span>${ST_LABEL[x.s]}</span><b>${rv(x.v)}</b><small>${x.n} conta${x.n === 1 ? "" : "s"}${totO ? ` · ${pct0.format(x.v / totO)}` : ""}</small></div>`).join("")}</div></div>`
+      : `<p class="note">Nenhuma despesa em ${mes}.</p>`;
+
+    // 4) vencimentos ao longo do mês (coluna por dia, empilhada por situação)
+    const [y, m] = cur.split("-").map(Number), ult = new Date(y, m, 0).getDate();
+    const hojeD = cur === nowKey() ? new Date().getDate() : 0;
+    const dias = Array.from({ length: ult }, (_, k) => ({ d: k + 1, pg: 0, pend: 0, venc: 0, itens: [] }));
+    it.filter((i) => i.dia > 0).forEach((i) => {
+      const x = dias[Math.min(i.dia, ult) - 1];
+      if (pago(i)) x.pg += i.orcado; else if (daysUntil(dueDate(cur, i.dia)) < 0) x.venc += i.orcado; else x.pend += i.orcado;
+      x.itens.push(i);
+    });
+    const dmax = Math.max(...dias.map((x) => x.pg + x.pend + x.venc), 1);
+    const cols = dias.map((x, n) => {
+      const tip = x.itens.length ? `<b>Dia ${x.d}${x.d === hojeD ? " (hoje)" : ""}</b>${x.itens.map((i) => `${esc(i.despesa)} · ${rv(i.orcado)} · ${ST_LABEL[i.status]}`).join("<br>")}` : "";
+      const bar = (cls, v) => (v ? `<i class="${cls}" data-h="${(v / dmax) * 100}" style="transition-delay:${n * 12}ms"></i>` : "");
+      return `<div class="dc${x.d === hojeD ? " hoje" : ""}"${tip ? tipAttr(tip) : ""}>${bar("venc", x.venc)}${bar("pend", x.pend)}${bar("pg", x.pg)}</div>`;
+    }).join("");
+    const marcas = [...new Set([1, 5, 10, 15, 20, 25, ult])].filter((d) => !hojeD || Math.abs(d - hojeD) > 1);
+    const ax = marcas.map((d) => `<span style="left:${((d - 0.5) / ult) * 100}%">${d}</span>`).join("") + (hojeD ? `<span class="hj" style="left:${((hojeD - 0.5) / ult) * 100}%">hoje</span>` : "");
+    const prox = it.filter((i) => !pago(i) && i.dia > 0 && daysUntil(dueDate(cur, i.dia)) >= 0).sort((a, b) => a.dia - b.dia)[0];
+    const venc = it.some((i) => i.dia > 0) ? `<div class="vc"><div class="lg"><span><i style="background:var(--st2)"></i>Pago</span><span><i style="background:var(--c-gas)"></i>A vencer</span><span><i style="background:var(--neg)"></i>Vencida</span></div>
+        <div class="cols">${cols}</div><div class="ax">${ax}</div>
+        ${prox ? `<p class="next">Próximo: <b>${esc(prox.despesa)}</b> · dia ${prox.dia} · ${rv(prox.orcado)}</p>` : ""}</div>`
+      : `<p class="note">Nenhuma despesa com dia de vencimento em ${mes}.</p>`;
+
+    // 5) maiores gastos reais
+    const top = [...it].filter((i) => i.real > 0).sort((a, b) => b.real - a.real).slice(0, 5).map((i) => ({ label: i.despesa, v: i.real, n: 1 }));
+
+    $("sumMes").innerHTML = kpis + `<div class="sgrid">
+      <div class="panel wide"><h2>Orçado x real por despesa</h2><p class="sub">Barra clara = orçado · barra cheia = gasto real · vermelho = passou do orçado</p>${bullets}</div>
+      <div class="panel"><h2>Situação das contas</h2><p class="sub">Pelo valor orçado de ${mes}</p>${donut}</div>
+      <div class="panel"><h2>Vencimentos em ${mes}</h2><p class="sub">Valor orçado por dia de vencimento</p>${venc}</div>
+      <div class="panel wide"><h2>Maiores gastos</h2><p class="sub">Gasto real · % sobre o total do mês</p>${top.length ? growRows(top, t.r, "var(--c-gas)") : `<p class="note">Sem gastos lançados ainda.</p>`}</div>
+    </div>`;
     renderYear();
+    if (view === "sum") animar($("v-sum"));
   }
+
+  // Barras começam em zero e crescem até o valor (data-w = largura %, data-h = altura %).
+  function animar(root) {
+    const els = [...root.querySelectorAll("[data-w],[data-h]")];
+    els.forEach((e) => { e.style.transition = "none"; if (e.dataset.w) e.style.width = "0"; else e.style.height = "0"; });
+    root.querySelectorAll(".pop, .reveal").forEach((e) => { e.style.animation = "none"; void e.offsetWidth; e.style.animation = ""; });
+    void root.offsetWidth;
+    requestAnimationFrame(() => els.forEach((e) => { e.style.transition = ""; if (e.dataset.w) e.style.width = e.dataset.w + "%"; else e.style.height = e.dataset.h + "%"; }));
+  }
+
+  // Dica flutuante: segue o mouse; no toque aparece ao tocar e some sozinha.
+  const tipEl = document.createElement("div"); tipEl.className = "ctip"; document.body.appendChild(tipEl);
+  let tipT;
+  const hideTip = () => tipEl.classList.remove("on");
+  function showTip(el, x, yy) {
+    tipEl.innerHTML = el.dataset.tip; tipEl.classList.add("on");
+    const w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+    let L = x + 14, T = yy - h - 12;
+    if (L + w > innerWidth - 8) L = x - w - 14;
+    if (L < 8) L = 8;
+    if (T < 8) T = yy + 18;
+    tipEl.style.left = L + "px"; tipEl.style.top = T + "px";
+  }
+  $("v-sum").addEventListener("pointermove", (e) => { if (e.pointerType !== "mouse") return; const el = e.target.closest("[data-tip]"); el ? showTip(el, e.clientX, e.clientY) : hideTip(); });
+  $("v-sum").addEventListener("pointerleave", hideTip);
+  $("v-sum").addEventListener("pointerdown", (e) => {
+    const el = e.target.closest("[data-tip]"); if (!el) return hideTip();
+    showTip(el, e.clientX, e.clientY); clearTimeout(tipT);
+    if (e.pointerType !== "mouse") tipT = setTimeout(hideTip, 2800);
+  });
+  window.addEventListener("scroll", hideTip, { passive: true });
 
   // ---------- resumo anual ----------
   const pct1 = new Intl.NumberFormat("pt-BR", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 });
@@ -797,9 +1002,9 @@ window.FCST_SEED = {};
     }
     return [...g.values()].filter((c) => c.v > 0).sort((a, b) => b.v - a.v);
   }
-  const growRows = (rows, total, color, fmt = brl.format) => {
+  const growRows = (rows, total, color, fmt = rv) => {
     const mx = Math.max(...rows.map((r) => r.v), 1);
-    return rows.map((r) => `<div class="grow" style="--c:${color}"><div class="gt"><span>${esc(r.label)}${r.n > 1 ? ` <small style="color:var(--muted)">×${r.n}</small>` : ""}</span><b>${fmt(r.v)}<em>${pct1.format(r.v / total)}</em></b></div><div class="tr"><i style="width:${(r.v / mx) * 100}%"></i></div></div>`).join("");
+    return rows.map((r, n) => `<div class="grow" style="--c:${color}"><div class="gt"><span>${esc(r.label)}${r.n > 1 ? ` <small style="color:var(--muted)">×${r.n}</small>` : ""}</span><b>${fmt(r.v)}<em>${pct1.format(r.v / total)}</em></b></div><div class="tr"><i data-w="${(r.v / mx) * 100}" style="transition-delay:${n * 40}ms"></i></div></div>`).join("");
   };
 
   function renderYear() {
@@ -808,35 +1013,58 @@ window.FCST_SEED = {};
     const rec = sumBy(rs, (r) => r.valor), gasto = sumBy(is, (i) => i.real), orc = sumBy(is, (i) => i.orcado), saldo = rec - gasto;
     if (!rec && !gasto) { $("sumAno").innerHTML = `<div class="empty">Sem dados em ${ANO} ainda.</div>`; return; }
 
-    const used = rec ? gasto / rec : 1;
     const origens = group(rs, (r) => r.descricao.trim() || "(sem descrição)", (r) => r.valor);
-    const gastos = group(is, (i) => baseName(i.despesa || "(sem nome)"), (i) => i.real);
-    const pri = ST.map((s) => ({ p: s, v: sumBy(is.filter((i) => i.status === s), (i) => i.real) }));
-    const months = ms.filter(([, m]) => m.receitas.length || m.items.some((i) => i.real > 0));
-    const mx = Math.max(...months.map(([, m]) => Math.max(sumBy(m.receitas, (r) => r.valor), sumBy(m.items, (i) => i.real))), 1);
+    const gastos = group(is, (i) => baseName(i.despesa || "(sem nome)"), (i) => i.real).slice(0, 10);
 
-    $("sumAno").innerHTML = `
-      <div class="hero">
-        <div class="lbl">Receita total em ${ANO}</div>
-        <div class="big">${rv(rec)}</div>
-        <div class="meter${used > 1 ? " over" : ""}"><i style="width:${Math.min(100, used * 100)}%"></i></div>
-        <div class="row">
-          <div><span>Gasto total (real)</span><b>${brl.format(gasto)}</b></div>
-          <div><span>Saldo (receita − gasto)</span><b>${rv(saldo)}</b></div>
-          <div><span>Receita comprometida</span><b>${rec ? pct1.format(gasto / rec) : "—"}</b></div>
-          <div><span>Orçado no ano</span><b>${brl.format(orc)}</b></div>
-        </div>
+    // série dos 12 meses (meses sem dados ficam vazios)
+    const serie = MES.map((nome, n) => {
+      const mm = state.months[`${ANO}-${String(n + 1).padStart(2, "0")}`] || { receitas: [], items: [] };
+      const r = sumBy(mm.receitas, (x) => x.valor), g = sumBy(mm.items, (x) => x.real), o = sumBy(mm.items, (x) => x.orcado);
+      return { nome, r, g, o, tem: r > 0 || g > 0 };
+    });
+    const mesAtual = new Date().getMonth();
+
+    // mês a mês: colunas receita x gasto real, orçado como traço
+    const ymax = Math.max(...serie.map((s) => Math.max(s.r, s.g, s.o)), 1);
+    const colsAno = serie.map((s, n) => {
+      const tip = `<b>${s.nome}</b>Receita: ${rv(s.r)}<br>Orçado: ${rv(s.o)}<br>Gasto real: ${rv(s.g)}<br>Saldo: ${rv(s.r - s.g)}`;
+      return `<div class="mg"${s.tem || s.o ? tipAttr(tip) : ""}>${s.r ? `<i class="rc" data-h="${(s.r / ymax) * 100}" style="transition-delay:${n * 35}ms"></i>` : ""}${s.g ? `<i class="gs" data-h="${(s.g / ymax) * 100}" style="transition-delay:${n * 35 + 20}ms"></i>` : ""}${s.o ? `<span class="ot" style="bottom:${(s.o / ymax) * 100}%"></span>` : ""}</div>`;
+    }).join("");
+    const axAno = serie.map((s, n) => `<span class="${n === mesAtual ? "cur" : ""}">${s.nome.slice(0, 3)}</span>`).join("");
+
+    // saldo acumulado: linha até o último mês com dados
+    const ultimo = serie.reduce((u, s, n) => (s.tem ? n : u), -1);
+    let run = 0;
+    const accs = serie.map((s, n) => (n <= ultimo ? (run += s.r - s.g) : null));
+    const vals = accs.filter((v) => v !== null), vmin = Math.min(0, ...vals), vmax = Math.max(0, ...vals), span = vmax - vmin || 1;
+    const Y = (v) => 8 + ((vmax - v) / span) * 84; // 8% de folga em cima e embaixo
+    const X = (n) => ((n + 0.5) / 12) * 100;
+    const pts = accs.map((v, n) => (v === null ? null : [X(n), Y(v)])).filter(Boolean);
+    const linha = pts.map((p, n) => `${n ? "L" : "M"}${p[0].toFixed(2)},${p[1].toFixed(2)}`).join(" ");
+    const area = pts.length ? `${linha} L${pts[pts.length - 1][0].toFixed(2)},${Y(0).toFixed(2)} L${pts[0][0].toFixed(2)},${Y(0).toFixed(2)} Z` : "";
+    const hits = serie.map((s, n) => accs[n] === null ? `<div><span>${s.nome.slice(0, 3)}</span></div>`
+      : `<div${tipAttr(`<b>${s.nome}</b>Saldo do mês: ${rv(s.r - s.g)}<br>Acumulado no ano: ${rv(accs[n])}`)}><i class="pt" style="top:${Y(accs[n])}%"></i><span>${s.nome.slice(0, 3)}</span></div>`).join("");
+    const final = accs[ultimo] ?? 0;
+
+    $("sumAno").innerHTML = `<div class="kpis">
+        ${kpi("Receita no ano", rv(rec), `${origens.length} origem${origens.length === 1 ? "" : "s"}`, "var(--c-rec)")}
+        ${kpi("Orçado no ano", rv(orc), "")}
+        ${kpi("Gasto real no ano", rv(gasto), orc ? `${pct0.format(gasto / orc)} do orçado` : "", "var(--c-gas)")}
+        ${kpi("Saldo do ano", `<span class="${semSinal(saldo)}">${rv(saldo)}</span>`, rec ? `${pct0.format(gasto / rec)} da receita gasta` : "")}
       </div>
-      <div class="panel" style="margin-top:14px"><h2>Mês a mês</h2>
-        <div class="lgd"><span><i style="background:var(--pos)"></i>Receita</span><span><i style="background:var(--neg)"></i>Gasto</span><span>Saldo à direita</span></div>
-        ${months.map(([k, m]) => { const r = sumBy(m.receitas, (x) => x.valor), g = sumBy(m.items, (x) => x.real);
-          return `<div class="mrow"><b>${MES[Number(k.split("-")[1]) - 1].slice(0, 3)}</b><div class="bars"><i class="g" style="width:${(r / mx) * 100}%"></i><i class="r" style="width:${(g / mx) * 100}%"></i></div><span class="${sign(r - g)}">${rv(r - g)}</span></div>`; }).join("")}
-      </div>
-      <div class="panel"><h2>Receita por origem</h2>${origens.length ? growRows(origens, rec, "var(--pos)", rv) : `<span class="note">Nenhuma receita cadastrada.</span>`}
-        ${origens.length ? `<p class="note" style="margin:12px 0 0">Total: <b>${rv(rec)}</b> · ${origens.length} ${origens.length > 1 ? "origens" : "origem"}</p>` : ""}</div>
-      <div class="panel"><h2>Gastos por nome</h2>${gastos.length ? growRows(gastos, gasto, "var(--accent)") : `<span class="note">Nenhum gasto real lançado.</span>`}
-        ${gastos.length ? `<p class="note" style="margin:12px 0 0">Total: <b>${brl.format(gasto)}</b> · % sobre o gasto total. “×N” = lançamentos agrupados (parcelas como 04/05 e 05/05 contam juntas).</p>` : ""}</div>
-      <div class="panel"><h2>Gasto por status</h2>${pri.map((x) => `<div class="brow st" style="--c:${SC[x.p]}"><b style="color:${SC[x.p]}">${ST_LABEL[x.p]}</b><div class="tr"><i style="width:${(x.v / Math.max(...pri.map((y) => y.v), 1)) * 100}%"></i></div><span>${brl.format(x.v)}${gasto ? " · " + pct0.format(x.v / gasto) : ""}</span></div>`).join("")}</div>`;
+      <div class="sgrid">
+        <div class="panel wide"><h2>Mês a mês</h2><p class="sub">Toque ou passe o mouse num mês para ver os valores</p>
+          <div class="mm"><div class="lg"><span><i style="background:var(--c-rec)"></i>Receita</span><span><i style="background:var(--c-gas)"></i>Gasto real</span><span><i class="tk"></i>Orçado</span></div>
+          <div class="cols">${colsAno}</div><div class="ax">${axAno}</div></div></div>
+        <div class="panel wide"><h2>Saldo acumulado</h2><p class="sub">Quanto sobrou (ou faltou) somando os meses · hoje: <b class="${semSinal(final)}">${rv(final)}</b></p>
+          <div class="lc"><svg viewBox="0 0 100 100" preserveAspectRatio="none" class="reveal">
+            <defs><linearGradient id="gSaldo" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--accent);stop-opacity:.3"/><stop offset="1" style="stop-color:var(--accent);stop-opacity:0"/></linearGradient></defs>
+            ${vmin < 0 ? `<line class="z" x1="0" x2="100" y1="${Y(0)}" y2="${Y(0)}"/>` : ""}
+            ${area ? `<path d="${area}" fill="url(#gSaldo)"/><path class="ln" d="${linha}"/>` : ""}
+          </svg><div class="hits reveal">${hits}</div></div></div>
+        <div class="panel"><h2>Receita por origem</h2>${origens.length ? growRows(origens, rec, "var(--c-rec)") : `<p class="note">Nenhuma receita cadastrada.</p>`}</div>
+        <div class="panel"><h2>Onde o dinheiro foi</h2><p class="sub">Gasto real por despesa (10 maiores) · parcelas somadas</p>${gastos.length ? growRows(gastos, gasto, "var(--c-gas)") : `<p class="note">Nenhum gasto real lançado.</p>`}</div>
+      </div>`;
   }
 
   // ---------- tema ----------
@@ -855,8 +1083,9 @@ window.FCST_SEED = {};
     $("themeBtn").title = `Tema: ${THEME_NAME[theme]}`;
     document.querySelectorAll("#themeSeg button").forEach((b) => b.classList.toggle("on", b.dataset.t === theme));
   }
-  // ---------- ocultar valores da receita ----------
-  // Troca só o número da receita (e do saldo, que a revelaria) por "R$ •••••"; rótulos, despesas e orçado continuam visíveis.
+  // ---------- ocultar valores ----------
+  // Troca os valores em R$ exibidos (receita, orçado, real, diferença, saldo) por "R$ •••••"; rótulos, percentuais e datas continuam.
+  // Exportações (CSV/JSON) e o texto das notificações usam brl.format direto e não são afetados.
   let ocultarRec = (() => { try { return localStorage.getItem("pf.hideRec") === "1"; } catch (e) { return false; } })();
   function rv(v) { return ocultarRec ? "R$ •••••" : brl.format(v); }
   const EYE = {
@@ -865,14 +1094,14 @@ window.FCST_SEED = {};
   };
   function applyEye() {
     $("eyeBtn").innerHTML = `<svg viewBox="0 0 24 24">${ocultarRec ? EYE.off : EYE.on}</svg>`;
-    $("eyeBtn").setAttribute("aria-label", ocultarRec ? "Mostrar valores da receita" : "Ocultar valores da receita");
+    $("eyeBtn").setAttribute("aria-label", ocultarRec ? "Mostrar valores" : "Ocultar valores");
     $("eyeBtn").title = $("eyeBtn").getAttribute("aria-label");
   }
   $("eyeBtn").onclick = () => {
     ocultarRec = !ocultarRec;
     try { localStorage.setItem("pf.hideRec", ocultarRec ? "1" : "0"); } catch (e) {}
-    applyEye(); renderHero(); renderRec(); renderSummary();
-    toast(ocultarRec ? "Valores da receita ocultos" : "Valores da receita visíveis");
+    applyEye(); renderHero(); renderList(); renderDonutStatus(); renderRec(); renderSummary();
+    toast(ocultarRec ? "Valores ocultos" : "Valores visíveis");
   };
   applyEye();
 
@@ -883,6 +1112,7 @@ window.FCST_SEED = {};
   function showSum() {
     $("sumMes").hidden = sumScope !== "mes"; $("sumAno").hidden = sumScope !== "ano";
     document.querySelectorAll("#sumScope button").forEach((b) => b.classList.toggle("on", b.dataset.s === sumScope));
+    if (view === "sum") animar($(sumScope === "mes" ? "sumMes" : "sumAno"));
   }
 
   function renderAll() {
@@ -939,13 +1169,24 @@ window.FCST_SEED = {};
       : ativo ? `Ativadas: aviso ${notify.dias} dia${notify.dias > 1 ? "s" : ""} antes e no dia do vencimento de cada despesa “A pagar”.`
       : "Você recebe um aviso quando uma despesa “A pagar” estiver perto de vencer e outro no dia do vencimento.";
   }
-  $("notifyBtn").onclick = async () => {
-    if (notify.on && podeNotificar()) { notify.on = false; salvarNotify(); renderLembretesUI(); syncLembretes(); toast("Lembretes desativados"); return; }
+  async function ativarLembretes() {
     if (!("Notification" in window)) { toast("Este navegador não suporta notificações"); return; }
     const p = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
     if (p !== "granted") { renderLembretesUI(); toast("Permissão negada pelo navegador"); return; }
-    notify.on = true; salvarNotify(); renderLembretesUI(); registrarPeriodic(); syncLembretes(); toast("Lembretes ativados");
+    notify.on = true; notify.asked = true; salvarNotify(); renderLembretesUI(); registrarPeriodic(); syncLembretes(); toast("Lembretes ativados");
+  }
+  $("notifyBtn").onclick = () => {
+    if (notify.on && podeNotificar()) { notify.on = false; salvarNotify(); renderLembretesUI(); syncLembretes(); toast("Lembretes desativados"); return; }
+    ativarLembretes();
   };
+  // Convite no primeiro login depois desta versão (uma vez por aparelho): só se o navegador suporta,
+  // o usuário ainda não decidiu e não bloqueou. A permissão só é pedida no toque em "Ativar".
+  function perguntarLembretes() {
+    if (notify.asked || !("Notification" in window) || Notification.permission === "denied" || (notify.on && podeNotificar())) return;
+    setTimeout(() => { if (session?.user && !document.body.className.match(/sheet\w?-open/)) document.body.classList.add("sheetn-open"); }, 900);
+  }
+  $("nYes").onclick = () => { notify.asked = true; salvarNotify(); closeSheet(); ativarLembretes(); };
+  $("nNo").onclick = () => { notify.asked = true; salvarNotify(); closeSheet(); toast("Dá para ativar depois em Ajustes"); };
   $("notifyDias").onclick = (e) => {
     const b = e.target.closest("[data-d]"); if (!b) return;
     notify.dias = Number(b.dataset.d); salvarNotify(); renderLembretesUI(); renderList(); syncLembretes();
@@ -960,6 +1201,7 @@ window.FCST_SEED = {};
     $("fab").style.display = v === "list" || v === "rec" ? "" : "none";
     $("fab").setAttribute("aria-label", v === "rec" ? "Nova receita" : "Nova despesa");
     window.scrollTo({ top: 0 });
+    if (v === "sum") animar($("v-sum"));
   }
 
   // ---------- folha de edição ----------
@@ -978,7 +1220,7 @@ window.FCST_SEED = {};
     document.body.classList.add("sheet-open");
     if (!id) setTimeout(() => $("fDesp").focus(), 300);
   }
-  const closeSheet = () => { document.body.classList.remove("sheet-open", "sheetr-open", "sheetm-open", "sheetl-open"); if (novaVersao) aplicarAtualizacao(); };
+  const closeSheet = () => { document.body.classList.remove("sheet-open", "sheetr-open", "sheetm-open", "sheetl-open", "sheetn-open"); if (novaVersao) aplicarAtualizacao(); };
 
   // ---------- folha de receita ----------
   let recEditing = null, recArmed = false;
@@ -1152,6 +1394,7 @@ window.FCST_SEED = {};
       cloudReady = true;
       if (pendingCloud) save();
       syncLembretes();
+      perguntarLembretes();
     } catch (error) {
       lockApp();
       setAuthStatus("Não foi possível carregar seus dados. Tente novamente.");
@@ -1222,7 +1465,7 @@ window.FCST_SEED = {};
 (function(){
   document.querySelectorAll(".hero").forEach(function(hero){
     var big = document.createElement("div"); big.className = "bigtile";
-    [".lbl", ".big", ".meter"].forEach(function(sel){ var el = hero.querySelector(sel); if (el) big.appendChild(el); });
+    [".lbl", ".big", ".meter", ".hsub"].forEach(function(sel){ var el = hero.querySelector(sel); if (el) big.appendChild(el); });
     hero.prepend(big);
   });
 })();
