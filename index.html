@@ -258,6 +258,14 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 .cat-item b { font-variant-numeric: tabular-nums; font-size: 13.5px; flex: none; }
 .cat-add { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 11px 16px; border-top: 1px solid var(--border); color: var(--accent); font-weight: 700; font-size: 13px; }
 .cat-add svg { width: 16px; height: 16px; flex: none; }
+
+/* ---- Vencimento ---- */
+.due { font-weight: 700; color: var(--muted); }
+.due.venc, .due.hoje { color: var(--neg); }
+.due.perto { color: #b7791f; }
+.due.pago { color: var(--pos); }
+:root[data-theme="dark"] .due.perto { color: var(--warn); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .due.perto { color: var(--warn); } }
 </style>
 </head>
 <body class="auth-locked">
@@ -355,7 +363,19 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
           <button type="button" data-t="dark">Escuro</button>
         </div>
         <button class="btn" id="copyPrev">Copiar despesas e receitas do mês anterior</button>
-        <p class="note">Copia tudo do mês anterior: despesas voltam com “Real” zerado e status “Não iniciada”.</p>
+        <p class="note">Automático: ao abrir um mês vazio, o app copia o último mês com lançamentos (despesas com o mesmo orçado, “Real” zerado e status “A pagar”; receitas iguais). Este botão faz a mesma cópia manualmente.</p>
+      </div>
+      <div class="panel">
+        <h2>Lembretes de vencimento</h2>
+        <button class="btn primary" id="notifyBtn" type="button">Ativar notificações</button>
+        <div class="field" style="margin:8px 0 0"><label>Avisar com antecedência de</label>
+          <div class="seg" id="notifyDias">
+            <button type="button" data-d="1">1 dia</button>
+            <button type="button" data-d="3">3 dias</button>
+            <button type="button" data-d="5">5 dias</button>
+          </div>
+        </div>
+        <p class="note" id="notifyNote">Você recebe um aviso quando uma despesa “A pagar” estiver perto de vencer e outro no dia do vencimento.</p>
       </div>
       <div class="panel">
         <h2>Backup</h2>
@@ -439,7 +459,7 @@ window.FCST_SEED = {};
   const authConfig = window.PERSONAL_FINANCE_CONFIG || {};
   const hasAuthConfig = /^https:\/\/.+\.supabase\.co$/i.test(authConfig.supabaseUrl || "") && Boolean(authConfig.supabaseAnonKey) && Boolean(window.supabase);
   const supabaseClient = hasAuthConfig ? window.supabase.createClient(authConfig.supabaseUrl, authConfig.supabaseAnonKey) : null;
-  let session = null, cloudReady = false, remoteSaveTimer = null, activeUserId = null;
+  let session = null, cloudReady = false, remoteSaveTimer = null, activeUserId = null, pendingCloud = false;
 
   // Logo: monograma "P" (Personal) + moeda com seta de crescimento. Mesmo desenho do icon.svg.
   const LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
@@ -470,6 +490,9 @@ window.FCST_SEED = {};
   }
 
   let state = load();
+  // Preferência de lembretes (por aparelho): ligado/desligado e dias de antecedência.
+  const NOTIFY_KEY = "pf.notify";
+  let notify = (() => { try { return { on: false, dias: 3, ...JSON.parse(localStorage.getItem(NOTIFY_KEY)) }; } catch (e) { return { on: false, dias: 3 }; } })();
   // O mês vigente (do calendário) é sempre o filtro ativo ao abrir o app.
   const nowKey = () => `${ANO}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
   let lastNow = nowKey();
@@ -495,7 +518,10 @@ window.FCST_SEED = {};
   }
   const save = () => {
     try { localStorage.setItem(session?.user ? `${KEY}.${session.user.id}` : KEY, JSON.stringify(state)); } catch (e) {}
-    if (!cloudReady || !session?.user || !supabaseClient) return;
+    if (!session?.user || !supabaseClient) return;
+    // Alterações feitas enquanto os dados da nuvem carregam (ex.: cópia automática do mês) sobem assim que liberar.
+    if (!cloudReady) { pendingCloud = true; return; }
+    pendingCloud = false;
     clearTimeout(remoteSaveTimer);
     remoteSaveTimer = setTimeout(async () => {
       const snapshot = JSON.parse(JSON.stringify(state));
@@ -510,6 +536,42 @@ window.FCST_SEED = {};
     return { o, r, d: o - r, rec, saldo: rec - r };
   };
   const mIdx = () => Number(cur.split("-")[1]) - 1;
+
+  // ---------- vencimento ----------
+  // Dia 31 num mês de 30 dias vence no último dia do mês.
+  function dueDate(key, dia) {
+    const [y, m] = key.split("-").map(Number);
+    return new Date(y, m - 1, Math.min(dia, new Date(y, m, 0).getDate()));
+  }
+  function daysUntil(d) { const h = new Date(); h.setHours(0, 0, 0, 0); return Math.round((d - h) / 864e5); }
+  const pago = (i) => i.status === "Concluída";
+  // Rótulo e cor do vencimento de uma despesa ainda não paga.
+  function dueInfo(key, i) {
+    if (!(i.dia > 0)) return null;
+    const n = daysUntil(dueDate(key, i.dia));
+    if (n < 0) return { c: "venc", t: `vencida dia ${i.dia}` };
+    if (n === 0) return { c: "hoje", t: "vence hoje" };
+    if (n <= notify.dias) return { c: "perto", t: `vence em ${n} dia${n > 1 ? "s" : ""}` };
+    return { c: "", t: `vence dia ${i.dia}` };
+  }
+
+  // ---------- cópia automática para meses novos ----------
+  // Mês vazio (e que ainda não recebeu cópia) herda tudo do último mês com lançamentos:
+  // despesas com o mesmo orçado, "Real" zerado (o usuário preenche) e status "A pagar"; receitas iguais.
+  // A marca `carried` impede que um mês esvaziado de propósito seja preenchido de novo.
+  function carryForward(key) {
+    const m = state.months[key];
+    if (m && (m.carried || m.items.length || m.receitas.length)) return null;
+    const src = Object.keys(state.months).filter((k) => k < key && (state.months[k].items.length || state.months[k].receitas.length)).sort().pop();
+    if (!src) return null;
+    const p = state.months[src];
+    state.months[key] = {
+      receitas: p.receitas.map((r) => ({ ...r, id: uid() })),
+      items: p.items.map((i) => ({ ...i, id: uid(), real: 0, status: "Não iniciada" })),
+      carried: true
+    };
+    return src;
+  }
 
   let toastT;
   function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2200); }
@@ -549,18 +611,26 @@ window.FCST_SEED = {};
       g.real += i.real; g.orcado += i.orcado; g.itens.push(i);
       mapa.set(key, g);
     });
-    const grupos = [...mapa.values()].sort((a, b) => b.real - a.real || b.orcado - a.orcado);
+    // Ordem por vencimento: primeiro o que ainda está a pagar (vencimento mais próximo no topo,
+    // sem dia no fim desse bloco); depois o que já foi todo pago, também por dia.
+    const diaOrd = (d) => (d > 0 ? d : 99);
+    mapa.forEach((g) => {
+      g.itens.sort((a, b) => diaOrd(a.dia) - diaOrd(b.dia));
+      g.prox = g.itens.find((i) => !pago(i)) || null;
+      g.ord = g.prox ? diaOrd(g.prox.dia) : 100 + diaOrd(g.itens[0].dia);
+    });
+    const grupos = [...mapa.values()].sort((a, b) => a.ord - b.ord || b.real - a.real || b.orcado - a.orcado);
     $("list").innerHTML = grupos.map((g) => {
-      g.itens.sort((a, b) => a.dia - b.dia);
       const aberto = gruposAbertos.has(g.key);
+      const di = g.prox ? dueInfo(cur, g.prox) : { c: "pago", t: "pago" };
       return `<div class="catcard${aberto ? " open" : ""}" data-key="${esc(g.key)}">
         <div class="cat-h">
-          <div class="ct"><h3>${esc(g.label)}</h3><small>${g.itens.length} lançamento${g.itens.length > 1 ? "s" : ""} · de ${brl.format(g.orcado)}</small></div>
+          <div class="ct"><h3>${esc(g.label)}</h3><small>${di ? `<span class="due ${di.c}">${di.t}</span> · ` : ""}${g.itens.length} lançamento${g.itens.length > 1 ? "s" : ""} · de ${brl.format(g.orcado)}</small></div>
           <div class="cv"><b>${brl.format(g.real)}</b><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
         </div>
         <div class="cat-body">${g.itens.map((i) => {
-          const si = ST.indexOf(i.status);
-          return `<div class="cat-item" data-id="${i.id}"><span class="cd">dia ${i.dia || "–"}</span><span class="ci-pill pill s${si}">${ST_LABEL[i.status]}</span><b>${brl.format(i.real)}</b></div>`;
+          const si = ST.indexOf(i.status), d = pago(i) ? null : dueInfo(cur, i);
+          return `<div class="cat-item" data-id="${i.id}"><span class="cd${d && d.c ? ` due ${d.c}` : ""}"${d ? ` title="${d.t}"` : ""}>dia ${i.dia || "–"}</span><span class="ci-pill pill s${si}">${ST_LABEL[i.status]}</span><b>${brl.format(i.real)}</b></div>`;
         }).join("")}<button type="button" class="cat-add" data-label="${esc(g.label)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Lançar despesa</button></div>
       </div>`;
     }).join("");
@@ -708,8 +778,72 @@ window.FCST_SEED = {};
   }
 
   function renderAll() {
+    const src = carryForward(cur);
+    if (src) { save(); toast(`Despesas e receitas de ${MES[Number(src.split("-")[1]) - 1]} copiadas para ${MES[mIdx()]}`); }
     renderMonths(); renderHero(); renderFilters(); renderList(); renderDonutStatus(); renderRec(); renderSummary();
+    agendarLembretes();
   }
+
+  // ---------- lembretes de vencimento (notificações) ----------
+  // A página grava as despesas a pagar (mês vigente e o próximo) num cache que o service worker lê.
+  // O sw.js decide o que avisar e guarda o que já foi avisado, então o aviso não se repete
+  // entre a página aberta e a verificação em segundo plano (periodic sync, quando o navegador suporta).
+  const PF_DATA = "pf-data", DUE_URL = "__pf/due.json";
+  const podeNotificar = () => "Notification" in window && Notification.permission === "granted";
+  function salvarNotify() { try { localStorage.setItem(NOTIFY_KEY, JSON.stringify(notify)); } catch (e) {} }
+  function lembretes() {
+    const [y, m] = nowKey().split("-").map(Number);
+    const prox = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
+    return [nowKey(), prox].flatMap((k) => (state.months[k]?.items || []).filter((i) => i.dia > 0 && !pago(i)).map((i) => {
+      const d = dueDate(k, i.dia);
+      return { id: i.id, nome: i.despesa, valor: brl.format(i.real || i.orcado), due: toDateInputValue(d), dataBR: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) };
+    }));
+  }
+  let lembT;
+  function agendarLembretes() { clearTimeout(lembT); lembT = setTimeout(syncLembretes, 800); }
+  async function syncLembretes() {
+    if (!("caches" in window) || !("serviceWorker" in navigator)) return;
+    try {
+      const on = notify.on && Boolean(session?.user) && cloudReady && podeNotificar();
+      const c = await caches.open(PF_DATA);
+      await c.put(DUE_URL, new Response(JSON.stringify({ on, dias: notify.dias, items: on ? lembretes() : [] }), { headers: { "content-type": "application/json" } }));
+      if (!on) return;
+      const reg = await navigator.serviceWorker.ready;
+      if (reg.active) reg.active.postMessage("pf-check-due");
+    } catch (e) {}
+  }
+  async function registrarPeriodic() {
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      if (!("periodicSync" in reg)) return;
+      const st = await navigator.permissions.query({ name: "periodic-background-sync" });
+      if (st.state === "granted") await reg.periodicSync.register("pf-due", { minInterval: 6 * 60 * 60 * 1000 });
+    } catch (e) {}
+  }
+  function renderLembretesUI() {
+    const sup = "Notification" in window, neg = sup && Notification.permission === "denied", ativo = notify.on && podeNotificar();
+    $("notifyBtn").textContent = ativo ? "Desativar notificações" : "Ativar notificações";
+    $("notifyBtn").classList.toggle("primary", !ativo);
+    document.querySelectorAll("#notifyDias button").forEach((b) => b.classList.toggle("on", Number(b.dataset.d) === notify.dias));
+    $("notifyNote").textContent = !sup
+      ? "Este navegador não suporta notificações. No iPhone, instale o app na Tela de Início (iOS 16.4+) e ative por lá."
+      : neg ? "As notificações estão bloqueadas para este site. Libere nas configurações do navegador e toque em Ativar."
+      : ativo ? `Ativadas: aviso ${notify.dias} dia${notify.dias > 1 ? "s" : ""} antes e no dia do vencimento de cada despesa “A pagar”.`
+      : "Você recebe um aviso quando uma despesa “A pagar” estiver perto de vencer e outro no dia do vencimento.";
+  }
+  $("notifyBtn").onclick = async () => {
+    if (notify.on && podeNotificar()) { notify.on = false; salvarNotify(); renderLembretesUI(); syncLembretes(); toast("Lembretes desativados"); return; }
+    if (!("Notification" in window)) { toast("Este navegador não suporta notificações"); return; }
+    const p = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
+    if (p !== "granted") { renderLembretesUI(); toast("Permissão negada pelo navegador"); return; }
+    notify.on = true; salvarNotify(); renderLembretesUI(); registrarPeriodic(); syncLembretes(); toast("Lembretes ativados");
+  };
+  $("notifyDias").onclick = (e) => {
+    const b = e.target.closest("[data-d]"); if (!b) return;
+    notify.dias = Number(b.dataset.d); salvarNotify(); renderLembretesUI(); renderList(); syncLembretes();
+  };
+  // Com o app aberto, confere de hora em hora (o dia pode virar com a tela ligada).
+  setInterval(syncLembretes, 60 * 60 * 1000);
 
   function setView(v) {
     view = v;
@@ -825,7 +959,8 @@ window.FCST_SEED = {};
   $("mToday").onclick = goNow; $("mNow").onclick = goNow;
   // Se o app ficou aberto na virada do mês, volta para o novo mês vigente.
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && nowKey() !== lastNow) { lastNow = nowKey(); goNow(); }
+    if (document.visibilityState !== "visible") return;
+    if (nowKey() !== lastNow) { lastNow = nowKey(); goNow(); } else { renderList(); syncLembretes(); }
   });
   $("filters").onclick = (e) => { const b = e.target.closest("[data-p]"); if (b) { fSt = b.dataset.p; renderFilters(); renderList(); } };
   $("search").oninput = (e) => { q = e.target.value.trim().toLowerCase(); renderList(); };
@@ -879,8 +1014,9 @@ window.FCST_SEED = {};
 
   function setAuthStatus(message) { $("authStatus").textContent = message; }
   function lockApp() {
-    cloudReady = false; session = null; activeUserId = null;
+    cloudReady = false; session = null; activeUserId = null; pendingCloud = false;
     clearTimeout(remoteSaveTimer);
+    syncLembretes(); // sem sessão: limpa a lista de lembretes do aparelho
     document.body.classList.add("auth-locked");
     $("authGate").hidden = false;
     $("authUser").textContent = "Não conectado";
@@ -896,7 +1032,7 @@ window.FCST_SEED = {};
   async function applySession(nextSession) {
     if (!nextSession?.user) { lockApp(); return; }
     const user = nextSession.user, userId = user.id;
-    session = nextSession; activeUserId = userId; cloudReady = false;
+    session = nextSession; activeUserId = userId; cloudReady = false; pendingCloud = false;
     document.body.classList.remove("auth-locked");
     $("authGate").hidden = true;
     $("authUser").textContent = user.email || user.user_metadata?.user_name || "Conta conectada";
@@ -906,6 +1042,8 @@ window.FCST_SEED = {};
       await loadCloudState(user);
       if (activeUserId !== userId) return;
       cloudReady = true;
+      if (pendingCloud) save();
+      syncLembretes();
     } catch (error) {
       lockApp();
       setAuthStatus("Não foi possível carregar seus dados. Tente novamente.");
@@ -936,7 +1074,8 @@ window.FCST_SEED = {};
   }
 
   if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
-  applyTheme(); showSum(); renderAll(); setView("list"); bootAuth();
+  applyTheme(); showSum(); renderLembretesUI(); renderAll(); setView("list"); bootAuth();
+  if (notify.on) registrarPeriodic();
 })();
 </script>
 <script>
