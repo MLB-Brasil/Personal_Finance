@@ -266,6 +266,86 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 .due.pago { color: var(--pos); }
 :root[data-theme="dark"] .due.perto { color: var(--warn); }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .due.perto { color: var(--warn); } }
+/* bloco de data no card: dia grande + mês, cor pela urgência.
+   Card em grade: [data][selo] no topo, nome embaixo (até 2 linhas), valor por último — cabe nas 2 colunas do celular. */
+.cat-h { display: grid; grid-template-columns: auto 1fr; grid-template-areas: "box pill" "ct ct" "cv cv"; align-items: center; column-gap: 10px; row-gap: 8px; }
+.cat-h .dbox { grid-area: box; }
+.cat-h .duepill { grid-area: pill; justify-self: start; margin: 0; }
+.cat-h .ct { grid-area: ct; }
+.cat-h h3 { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.cat-h .cv { grid-area: cv; justify-content: space-between; }
+.dbox small { color: inherit; }
+.dbox { --dc: var(--accent); flex: none; width: 50px; height: 54px; border-radius: 14px; display: grid; place-content: center; text-align: center; line-height: 1;
+  color: var(--dc); background: color-mix(in srgb, var(--dc) 13%, transparent); border: 1.5px solid color-mix(in srgb, var(--dc) 35%, transparent); }
+.dbox small { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; opacity: .85; }
+.dbox b { font-size: 22px; font-weight: 800; letter-spacing: -.5px; margin: 2px 0 1px; font-variant-numeric: tabular-nums; }
+.dbox.venc, .dbox.hoje { --dc: var(--neg); }
+.dbox.hoje { background: var(--neg); color: #fff; border-color: var(--neg); }
+.dbox.perto { --dc: #d97706; }
+.dbox.pago { --dc: var(--pos); opacity: .75; }
+.dbox.sem { --dc: var(--muted); }
+.duepill { display: inline-block; white-space: nowrap; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin: 3px 0 2px; color: var(--muted); background: var(--surface2); }
+.duepill.venc, .duepill.hoje { color: var(--neg); background: color-mix(in srgb, var(--neg) 14%, transparent); }
+.duepill.perto { color: #b7791f; background: color-mix(in srgb, var(--warn) 18%, transparent); }
+.duepill.pago { color: var(--pos); background: color-mix(in srgb, var(--pos) 14%, transparent); }
+:root[data-theme="dark"] .duepill.perto { color: var(--warn); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .duepill.perto { color: var(--warn); } }
+
+/* ---- Computador / notebook (≥ 900px) ----
+   Celular continua igual. No computador: menu lateral no lugar da barra inferior, conteúdo largo,
+   cards em mais colunas, painéis lado a lado e as folhas de edição viram janelas centralizadas. */
+@media (min-width: 900px) {
+  body { font-size: 15.5px; padding-left: 232px; }
+  .app { max-width: 1240px; padding: 0 32px 48px; }
+  .top { padding: 20px 0 12px; }
+  .top h1 { font-size: 24px; margin-bottom: 14px; }
+  main { padding: 10px 0 0; }
+  .mfbar { max-width: 420px; }
+
+  /* menu lateral */
+  .nav { top: 0; right: auto; width: 232px; padding: 28px 14px 20px; border-top: 0; border-right: 1px solid var(--border); display: block; background: var(--surface); }
+  .nav div { flex-direction: column; gap: 4px; }
+  .nav button { flex: none; display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 12px; font-size: 14px; }
+  .nav button:hover { background: var(--surface2); color: var(--text); }
+  .nav button.on { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .nav svg { width: 20px; height: 20px; }
+  .fab { right: 32px; bottom: 32px; }
+
+  /* despesas: resumo numa faixa, cards em várias colunas */
+  #v-list .hero { grid-template-columns: minmax(300px, 1fr) 1.6fr; align-items: stretch; gap: 14px; }
+  .bigtile { display: flex; flex-direction: column; justify-content: center; }
+  .hero .row { grid-template-columns: repeat(2, 1fr); }
+  .donutcard { margin: 16px 0; max-width: 520px; }
+  .filters { margin: 16px 0 10px; padding-inline: 0; flex-wrap: wrap; }
+  .search { max-width: 420px; }
+  .list { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+  .catcard { transition: box-shadow .15s; }
+  .catcard:hover { box-shadow: 0 10px 30px rgba(40, 45, 90, .14); }
+  .cat-item:hover, .ln:not(.tot):hover { background: var(--surface2); }
+
+  /* receitas: resumo à esquerda, lista à direita */
+  #v-rec.on { display: grid; grid-template-columns: minmax(300px, 1fr) 1.4fr; column-gap: 20px; align-items: start; }
+  #v-rec .hero.green { grid-row: 1 / span 2; grid-template-columns: 1fr; margin-bottom: 0; position: sticky; top: 150px; }
+  #v-rec .seg.scope { max-width: 360px; }
+
+  /* resumo e ajustes: painéis em duas colunas */
+  #sumMes, #sumAno:not([hidden]) { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  #sumMes .panel, #sumAno .panel { margin: 0 !important; }
+  #sumAno > .hero { grid-column: 1 / -1; }
+  #v-sum .seg.scope { max-width: 360px; }
+  #v-set.on { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  #v-set .panel { margin: 0; }
+
+  /* folhas de edição → janelas centralizadas */
+  .sheet { left: 50%; right: auto; top: 50%; bottom: auto; width: min(480px, 92vw); max-height: 86vh; margin: 0; border-radius: 24px; padding: 22px 24px;
+    transform: translate(-50%, -46%); opacity: 0; visibility: hidden; transition: opacity .18s, transform .18s, visibility .18s; box-shadow: 0 24px 60px rgba(0, 0, 0, .25); }
+  body.sheet-open #sheet, body.sheetr-open #sheetR, body.sheetm-open #sheetM, body.sheetl-open #sheetL { transform: translate(-50%, -50%); opacity: 1; visibility: visible; }
+  .grab { display: none; }
+  .toast { bottom: 40px; }
+}
+@media (min-width: 1400px) {
+  .app { max-width: 1400px; }
+}
 </style>
 </head>
 <body class="auth-locked">
@@ -280,7 +360,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 </section>
 <div class="app">
   <header class="top">
-    <h1><span class="brand"><span class="logo" id="logo" aria-hidden="true"></span>Personal Finance</span><button class="ibtn" id="themeBtn" aria-label="Alternar tema"></button></h1>
+    <h1><span class="brand"><span class="logo" id="logo" aria-hidden="true"></span>Personal Finance</span><span class="hr"><button class="ibtn" id="eyeBtn" type="button"></button><button class="ibtn" id="themeBtn" aria-label="Alternar tema"></button></span></h1>
     <div class="hi" id="hiUser" hidden></div>
     <div class="mfbar">
       <button class="mf" id="mFilter" aria-haspopup="dialog" aria-label="Filtrar por mês">
@@ -585,10 +665,10 @@ window.FCST_SEED = {};
   function renderHero() {
     const t = totals();
     $("hReal").textContent = brl.format(t.r);
-    $("hRec").textContent = brl.format(t.rec);
+    $("hRec").textContent = rv(t.rec);
     $("hOrc").textContent = brl.format(t.o);
     $("hDif").textContent = brl.format(t.d);
-    $("hSaldo").textContent = t.rec ? brl.format(t.saldo) : "—";
+    $("hSaldo").textContent = t.rec ? rv(t.saldo) : "—";
     const used = t.o ? t.r / t.o : (t.r ? 1 : 0);
     $("hMeter").classList.toggle("over", used > 1);
     $("hMeter").firstElementChild.style.width = Math.min(100, used * 100) + "%";
@@ -622,10 +702,17 @@ window.FCST_SEED = {};
     const grupos = [...mapa.values()].sort((a, b) => a.ord - b.ord || b.real - a.real || b.orcado - a.orcado);
     $("list").innerHTML = grupos.map((g) => {
       const aberto = gruposAbertos.has(g.key);
+      // Destaque do card: o próximo vencimento a pagar (ou o primeiro dia, se tudo já foi pago).
+      const ref = g.prox || g.itens[0];
       const di = g.prox ? dueInfo(cur, g.prox) : { c: "pago", t: "pago" };
+      const dia = ref.dia > 0 ? dueDate(cur, ref.dia).getDate() : null;
+      const box = `<div class="dbox ${dia ? (di?.c || "") : "sem"}"><small>${dia ? "dia" : "sem"}</small><b>${dia ? String(dia).padStart(2, "0") : "–"}</b><small>${dia ? MES[mIdx()].slice(0, 3) : "data"}</small></div>`;
+      // O dia já está no bloco; o selo diz só a situação, curto para caber no card.
+      const selo = di ? { venc: "vencida", hoje: "vence hoje", perto: di.t.replace("vence ", ""), pago: "pago" }[di.c] || "a vencer" : "";
       return `<div class="catcard${aberto ? " open" : ""}" data-key="${esc(g.key)}">
         <div class="cat-h">
-          <div class="ct"><h3>${esc(g.label)}</h3><small>${di ? `<span class="due ${di.c}">${di.t}</span> · ` : ""}${g.itens.length} lançamento${g.itens.length > 1 ? "s" : ""} · de ${brl.format(g.orcado)}</small></div>
+          ${box}${selo ? `<span class="duepill ${di.c}">${selo}</span>` : ""}
+          <div class="ct"><h3>${esc(g.label)}</h3><small>${g.itens.length} lançamento${g.itens.length > 1 ? "s" : ""} · de ${brl.format(g.orcado)}</small></div>
           <div class="cv"><b>${brl.format(g.real)}</b><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></div>
         </div>
         <div class="cat-body">${g.itens.map((i) => {
@@ -659,23 +746,23 @@ window.FCST_SEED = {};
 
   function renderRec() {
     const t = totals(), rs = M().receitas;
-    $("rTotal").textContent = brl.format(t.rec);
+    $("rTotal").textContent = rv(t.rec);
     $("rReal").textContent = brl.format(t.r);
-    $("rSaldo").textContent = brl.format(t.saldo);
+    $("rSaldo").textContent = rv(t.saldo);
     const used = t.rec ? t.r / t.rec : (t.r ? 1 : 0);
     $("rMeter").classList.toggle("over", used > 1);
     $("rMeter").firstElementChild.style.width = Math.min(100, used * 100) + "%";
-    const line = (r, m) => `<div class="ln" data-rid="${r.id}" data-m="${m}"><span>${esc(r.descricao || "(sem descrição)")}</span><b>${brl.format(r.valor)}</b></div>`;
+    const line = (r, m) => `<div class="ln" data-rid="${r.id}" data-m="${m}"><span>${esc(r.descricao || "(sem descrição)")}</span><b>${rv(r.valor)}</b></div>`;
     document.querySelectorAll("#recScope button").forEach((b) => b.classList.toggle("on", b.dataset.s === recScope));
     let html;
     if (recScope === "mes") {
-      html = rs.length ? `<div class="lines">${rs.map((r) => line(r, cur)).join("")}<div class="ln tot"><span>Total</span><b>${brl.format(t.rec)}</b></div></div>`
+      html = rs.length ? `<div class="lines">${rs.map((r) => line(r, cur)).join("")}<div class="ln tot"><span>Total</span><b>${rv(t.rec)}</b></div></div>`
         : `<div class="empty">Nenhuma receita neste mês.<br>Toque em + para adicionar.</div>`;
     } else {
       const keys = Object.keys(state.months).filter((k) => state.months[k].receitas.length).sort();
       const sum = (m) => m.receitas.reduce((s, r) => s + r.valor, 0);
-      html = keys.length ? `<div class="lines">${keys.map((k) => `<div class="lh"><span>${MES[Number(k.split("-")[1]) - 1]}</span><span>${brl.format(sum(state.months[k]))}</span></div>${state.months[k].receitas.map((r) => line(r, k)).join("")}`).join("")}
-        <div class="ln tot"><span>Total do ano</span><b>${brl.format(keys.reduce((s, k) => s + sum(state.months[k]), 0))}</b></div></div>`
+      html = keys.length ? `<div class="lines">${keys.map((k) => `<div class="lh"><span>${MES[Number(k.split("-")[1]) - 1]}</span><span>${rv(sum(state.months[k]))}</span></div>${state.months[k].receitas.map((r) => line(r, k)).join("")}`).join("")}
+        <div class="ln tot"><span>Total do ano</span><b>${rv(keys.reduce((s, k) => s + sum(state.months[k]), 0))}</b></div></div>`
         : `<div class="empty">Nenhuma receita cadastrada em ${ANO}.</div>`;
     }
     $("recList").innerHTML = html;
@@ -684,9 +771,9 @@ window.FCST_SEED = {};
   function renderSummary() {
     const it = M().items, t = totals();
     const mx = Math.max(t.rec, t.r, 1);
-    $("cmp").innerHTML = `<div class="brow" style="--c:var(--pos)"><b style="color:var(--pos)">Rec.</b><div class="tr"><i style="width:${(t.rec / mx) * 100}%"></i></div><span>${brl.format(t.rec)}</span></div>
+    $("cmp").innerHTML = `<div class="brow" style="--c:var(--pos)"><b style="color:var(--pos)">Rec.</b><div class="tr"><i style="width:${(t.rec / mx) * 100}%"></i></div><span>${rv(t.rec)}</span></div>
       <div class="brow" style="--c:var(--neg)"><b style="color:var(--neg)">Desp.</b><div class="tr"><i style="width:${(t.r / mx) * 100}%"></i></div><span>${brl.format(t.r)}</span></div>
-      <p class="note" style="margin:0">${t.rec ? `Saldo: <b class="${sign(t.saldo)}">${brl.format(t.saldo)}</b> · ${pct0.format(t.r / t.rec)} da receita comprometida` : "Cadastre as receitas do mês na aba Receitas."}</p>`;
+      <p class="note" style="margin:0">${t.rec ? `Saldo: <b class="${sign(t.saldo)}">${rv(t.saldo)}</b> · ${pct0.format(t.r / t.rec)} da receita comprometida` : "Cadastre as receitas do mês na aba Receitas."}</p>`;
     const by = Object.fromEntries(ST.map((s) => [s, 0]));
     it.forEach((i) => (by[i.status] += i.real));
     const max = Math.max(...Object.values(by), 1);
@@ -710,9 +797,9 @@ window.FCST_SEED = {};
     }
     return [...g.values()].filter((c) => c.v > 0).sort((a, b) => b.v - a.v);
   }
-  const growRows = (rows, total, color) => {
+  const growRows = (rows, total, color, fmt = brl.format) => {
     const mx = Math.max(...rows.map((r) => r.v), 1);
-    return rows.map((r) => `<div class="grow" style="--c:${color}"><div class="gt"><span>${esc(r.label)}${r.n > 1 ? ` <small style="color:var(--muted)">×${r.n}</small>` : ""}</span><b>${brl.format(r.v)}<em>${pct1.format(r.v / total)}</em></b></div><div class="tr"><i style="width:${(r.v / mx) * 100}%"></i></div></div>`).join("");
+    return rows.map((r) => `<div class="grow" style="--c:${color}"><div class="gt"><span>${esc(r.label)}${r.n > 1 ? ` <small style="color:var(--muted)">×${r.n}</small>` : ""}</span><b>${fmt(r.v)}<em>${pct1.format(r.v / total)}</em></b></div><div class="tr"><i style="width:${(r.v / mx) * 100}%"></i></div></div>`).join("");
   };
 
   function renderYear() {
@@ -731,11 +818,11 @@ window.FCST_SEED = {};
     $("sumAno").innerHTML = `
       <div class="hero">
         <div class="lbl">Receita total em ${ANO}</div>
-        <div class="big">${brl.format(rec)}</div>
+        <div class="big">${rv(rec)}</div>
         <div class="meter${used > 1 ? " over" : ""}"><i style="width:${Math.min(100, used * 100)}%"></i></div>
         <div class="row">
           <div><span>Gasto total (real)</span><b>${brl.format(gasto)}</b></div>
-          <div><span>Saldo (receita − gasto)</span><b>${brl.format(saldo)}</b></div>
+          <div><span>Saldo (receita − gasto)</span><b>${rv(saldo)}</b></div>
           <div><span>Receita comprometida</span><b>${rec ? pct1.format(gasto / rec) : "—"}</b></div>
           <div><span>Orçado no ano</span><b>${brl.format(orc)}</b></div>
         </div>
@@ -743,10 +830,10 @@ window.FCST_SEED = {};
       <div class="panel" style="margin-top:14px"><h2>Mês a mês</h2>
         <div class="lgd"><span><i style="background:var(--pos)"></i>Receita</span><span><i style="background:var(--neg)"></i>Gasto</span><span>Saldo à direita</span></div>
         ${months.map(([k, m]) => { const r = sumBy(m.receitas, (x) => x.valor), g = sumBy(m.items, (x) => x.real);
-          return `<div class="mrow"><b>${MES[Number(k.split("-")[1]) - 1].slice(0, 3)}</b><div class="bars"><i class="g" style="width:${(r / mx) * 100}%"></i><i class="r" style="width:${(g / mx) * 100}%"></i></div><span class="${sign(r - g)}">${brl.format(r - g)}</span></div>`; }).join("")}
+          return `<div class="mrow"><b>${MES[Number(k.split("-")[1]) - 1].slice(0, 3)}</b><div class="bars"><i class="g" style="width:${(r / mx) * 100}%"></i><i class="r" style="width:${(g / mx) * 100}%"></i></div><span class="${sign(r - g)}">${rv(r - g)}</span></div>`; }).join("")}
       </div>
-      <div class="panel"><h2>Receita por origem</h2>${origens.length ? growRows(origens, rec, "var(--pos)") : `<span class="note">Nenhuma receita cadastrada.</span>`}
-        ${origens.length ? `<p class="note" style="margin:12px 0 0">Total: <b>${brl.format(rec)}</b> · ${origens.length} ${origens.length > 1 ? "origens" : "origem"}</p>` : ""}</div>
+      <div class="panel"><h2>Receita por origem</h2>${origens.length ? growRows(origens, rec, "var(--pos)", rv) : `<span class="note">Nenhuma receita cadastrada.</span>`}
+        ${origens.length ? `<p class="note" style="margin:12px 0 0">Total: <b>${rv(rec)}</b> · ${origens.length} ${origens.length > 1 ? "origens" : "origem"}</p>` : ""}</div>
       <div class="panel"><h2>Gastos por nome</h2>${gastos.length ? growRows(gastos, gasto, "var(--accent)") : `<span class="note">Nenhum gasto real lançado.</span>`}
         ${gastos.length ? `<p class="note" style="margin:12px 0 0">Total: <b>${brl.format(gasto)}</b> · % sobre o gasto total. “×N” = lançamentos agrupados (parcelas como 04/05 e 05/05 contam juntas).</p>` : ""}</div>
       <div class="panel"><h2>Gasto por status</h2>${pri.map((x) => `<div class="brow st" style="--c:${SC[x.p]}"><b style="color:${SC[x.p]}">${ST_LABEL[x.p]}</b><div class="tr"><i style="width:${(x.v / Math.max(...pri.map((y) => y.v), 1)) * 100}%"></i></div><span>${brl.format(x.v)}${gasto ? " · " + pct0.format(x.v / gasto) : ""}</span></div>`).join("")}</div>`;
@@ -768,6 +855,27 @@ window.FCST_SEED = {};
     $("themeBtn").title = `Tema: ${THEME_NAME[theme]}`;
     document.querySelectorAll("#themeSeg button").forEach((b) => b.classList.toggle("on", b.dataset.t === theme));
   }
+  // ---------- ocultar valores da receita ----------
+  // Troca só o número da receita (e do saldo, que a revelaria) por "R$ •••••"; rótulos, despesas e orçado continuam visíveis.
+  let ocultarRec = (() => { try { return localStorage.getItem("pf.hideRec") === "1"; } catch (e) { return false; } })();
+  function rv(v) { return ocultarRec ? "R$ •••••" : brl.format(v); }
+  const EYE = {
+    on: `<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>`,
+    off: `<path d="M3 3l18 18M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.1 3.9M6.6 6.6A17.4 17.4 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/>`
+  };
+  function applyEye() {
+    $("eyeBtn").innerHTML = `<svg viewBox="0 0 24 24">${ocultarRec ? EYE.off : EYE.on}</svg>`;
+    $("eyeBtn").setAttribute("aria-label", ocultarRec ? "Mostrar valores da receita" : "Ocultar valores da receita");
+    $("eyeBtn").title = $("eyeBtn").getAttribute("aria-label");
+  }
+  $("eyeBtn").onclick = () => {
+    ocultarRec = !ocultarRec;
+    try { localStorage.setItem("pf.hideRec", ocultarRec ? "1" : "0"); } catch (e) {}
+    applyEye(); renderHero(); renderRec(); renderSummary();
+    toast(ocultarRec ? "Valores da receita ocultos" : "Valores da receita visíveis");
+  };
+  applyEye();
+
   $("themeBtn").onclick = () => { theme = { auto: "light", light: "dark", dark: "auto" }[theme]; applyTheme(); toast(`Tema: ${THEME_NAME[theme]}`); };
   $("themeSeg").onclick = (e) => { const b = e.target.closest("[data-t]"); if (b) { theme = b.dataset.t; applyTheme(); } };
 
