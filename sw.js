@@ -4,7 +4,7 @@
  * então login e dados financeiros nunca ficam no cache do service worker.
  * Também mostra os lembretes de vencimento: a página grava em "pf-data" só a lista
  * de despesas a pagar (nome, valor, data) do usuário conectado; nada disso vai para a rede. */
-const CACHE = "personal-finance-v2";
+const CACHE = "personal-finance-v3";
 const DATA = "pf-data";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon.svg"];
 const DUE_URL = new URL("__pf/due.json", self.registration.scope).href;
@@ -23,13 +23,15 @@ self.addEventListener("activate", (event) => {
 });
 
 // Rede primeiro (sempre a versão mais nova); se estiver offline, usa o cache.
+// Abrir o app revalida o HTML no servidor (no-cache), em vez de aceitar a cópia do cache HTTP
+// do navegador, que no GitHub Pages pode ficar até 10 min desatualizada.
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
   event.respondWith(
-    fetch(req)
+    fetch(req.mode === "navigate" ? new Request(req.url, { cache: "no-cache", credentials: "same-origin" }) : req)
       .then((res) => {
         if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
         return res;

@@ -459,7 +459,7 @@ window.FCST_SEED = {};
   const authConfig = window.PERSONAL_FINANCE_CONFIG || {};
   const hasAuthConfig = /^https:\/\/.+\.supabase\.co$/i.test(authConfig.supabaseUrl || "") && Boolean(authConfig.supabaseAnonKey) && Boolean(window.supabase);
   const supabaseClient = hasAuthConfig ? window.supabase.createClient(authConfig.supabaseUrl, authConfig.supabaseAnonKey) : null;
-  let session = null, cloudReady = false, remoteSaveTimer = null, activeUserId = null, pendingCloud = false;
+  let session = null, cloudReady = false, remoteSaveTimer = null, activeUserId = null, pendingCloud = false, syncing = Promise.resolve();
 
   // Logo: monograma "P" (Personal) + moeda com seta de crescimento. Mesmo desenho do icon.svg.
   const LOGO = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs>
@@ -523,10 +523,10 @@ window.FCST_SEED = {};
     if (!cloudReady) { pendingCloud = true; return; }
     pendingCloud = false;
     clearTimeout(remoteSaveTimer);
-    remoteSaveTimer = setTimeout(async () => {
+    remoteSaveTimer = setTimeout(() => {
       const snapshot = JSON.parse(JSON.stringify(state));
-      const { error } = await supabaseClient.from("finance_states").upsert({ user_id: session.user.id, state: snapshot, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
-      if (error) toast("Não foi possível sincronizar. Suas alterações continuam neste dispositivo.");
+      syncing = supabaseClient.from("finance_states").upsert({ user_id: session.user.id, state: snapshot, updated_at: new Date().toISOString() }, { onConflict: "user_id" })
+        .then(({ error }) => { if (error) toast("Não foi possível sincronizar. Suas alterações continuam neste dispositivo."); });
     }, 450);
   };
   const M = () => (state.months[cur] ||= { receitas: [], items: [] });
@@ -870,7 +870,7 @@ window.FCST_SEED = {};
     document.body.classList.add("sheet-open");
     if (!id) setTimeout(() => $("fDesp").focus(), 300);
   }
-  const closeSheet = () => document.body.classList.remove("sheet-open", "sheetr-open", "sheetm-open", "sheetl-open");
+  const closeSheet = () => { document.body.classList.remove("sheet-open", "sheetr-open", "sheetm-open", "sheetl-open"); if (novaVersao) aplicarAtualizacao(); };
 
   // ---------- folha de receita ----------
   let recEditing = null, recArmed = false;
@@ -1073,7 +1073,39 @@ window.FCST_SEED = {};
     await applySession(data.session);
   }
 
-  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
+  // ---------- atualização forçada ----------
+  // Ao abrir, ao voltar para o app e a cada 15 min, baixa o index.html publicado e compara com o
+  // da abertura. Mudou = nova versão: espera fechar a folha de edição aberta e a sincronização
+  // pendente, e recarrega. Não precisa trocar número de versão a cada publicação.
+  let versaoBase = null, novaVersao = false, recarregando = false;
+  async function buscarVersao() {
+    try { const r = await fetch(location.pathname, { cache: "no-cache" }); return r.ok ? await r.text() : null; } catch (e) { return null; }
+  }
+  async function checarAtualizacao() {
+    if (!location.protocol.startsWith("http") || novaVersao) return;
+    navigator.serviceWorker?.getRegistration().then((reg) => reg && reg.update()).catch(() => {});
+    const v = await buscarVersao();
+    if (!v) return;
+    if (versaoBase === null) { versaoBase = v; return; }
+    if (v !== versaoBase) { novaVersao = true; aplicarAtualizacao(); }
+  }
+  async function aplicarAtualizacao() {
+    if (recarregando || document.body.className.match(/sheet\w?-open/)) return; // espera o usuário terminar a edição
+    recarregando = true;
+    toast("Nova versão disponível. Atualizando…");
+    await new Promise((r) => setTimeout(r, 1200)); // cobre o atraso de 450 ms do envio para a nuvem
+    await syncing;
+    location.reload();
+  }
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).catch(() => {});
+    // Um service worker novo assumiu a página: recarrega para usar a versão nova.
+    const tinhaSW = Boolean(navigator.serviceWorker.controller);
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (tinhaSW) { novaVersao = true; aplicarAtualizacao(); } });
+  }
+  checarAtualizacao();
+  setInterval(checarAtualizacao, 15 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checarAtualizacao(); });
   applyTheme(); showSum(); renderLembretesUI(); renderAll(); setView("list"); bootAuth();
   if (notify.on) registrarPeriodic();
 })();
