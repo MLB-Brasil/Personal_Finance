@@ -209,12 +209,24 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 .hero { background: none; box-shadow: none; padding: 0; color: var(--text); display: grid; gap: 10px; }
 .bigtile { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 24px; padding: 20px; box-shadow: 0 12px 30px rgba(91, 79, 190, .28); }
 .bigtile .big { margin-bottom: 12px; }
+.bigtile .big#hTitulo { font-size: 26px; }
+.bigtile.ok { background: linear-gradient(135deg, #12a150, #1f9e5c 55%, #3aaa8a); box-shadow: 0 12px 30px rgba(18, 161, 80, .25); }
+.bigtile.warn { background: linear-gradient(135deg, #c93a3a, #e0643a); box-shadow: 0 12px 30px rgba(201, 58, 58, .28); }
+.bigtile .hsub { font-size: 12.5px; margin-top: 8px; opacity: .92; }
+.hdesv { display: grid; gap: 4px; margin-top: 10px; }
+.hdesv:empty { display: none; }
+.hdesv div { display: flex; justify-content: space-between; gap: 10px; background: rgba(255,255,255,.18); border-radius: 10px; padding: 6px 10px; font-size: 12.5px; }
+.hdesv span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.hdesv b { flex: none; font-variant-numeric: tabular-nums; }
+.hdesv small { font-size: 11.5px; opacity: .85; padding-left: 2px; }
+.hero .row .orc { grid-column: 1 / -1; background: #EAEEF5; }
 .hero .row { margin-top: 0; gap: 10px; }
 .hero .row div { border-radius: 20px; padding: 14px; background: #E1EBFA; }
 .hero .row div:nth-child(1) { background: #DDF1E8; }
 .hero .row div:nth-child(2) { background: #E1EBFA; }
 .hero .row div:nth-child(3) { background: #FBEFD3; }
 .hero .row div:nth-child(4) { background: #E7E2F6; }
+.hero .row div.orc { background: #EAEEF5; }
 .hero .row span { color: #55627a; opacity: 1; }
 .hero .row b { color: #1d2740; font-size: 15px; }
 .list { grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -234,11 +246,12 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 /* margem à direita: sem ela, os valores do gráfico ficam embaixo do botão "+" fixo em telas mais baixas */
 .donut { width: 92px; height: 92px; border-radius: 50%; flex: none; position: relative; }
 .donut::after { content: attr(data-t); position: absolute; inset: 18px; background: var(--surface); border-radius: 50%; display: grid; place-content: center; font-size: 11.5px; font-weight: 800; text-align: center; line-height: 1.25; white-space: pre-line; }
-.dleg { flex: 1; display: grid; gap: 7px; font-size: 12.5px; min-width: 0; }
-.dleg div { display: flex; justify-content: space-between; gap: 8px; }
-.dleg span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dleg { flex: 1; display: grid; gap: 8px; font-size: 12.5px; min-width: 0; }
+.dleg > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; row-gap: 0; align-items: baseline; }
+.dleg span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .dleg i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; flex: none; }
-.dleg b { flex: none; }
+.dleg b { white-space: nowrap; }
+.dleg small { grid-column: 1 / -1; padding-left: 15px; color: var(--muted); font-size: 11.5px; font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---- Opção 3 · Por categorias ---- */
 .catcard { background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
@@ -481,15 +494,19 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
     <!-- DESPESAS -->
     <section class="view on" id="v-list">
       <div class="hero">
-        <div class="lbl">Orçado no mês</div>
-        <div class="big" id="hOrc">R$ 0,00</div>
-        <div class="meter" id="hMeter"><i style="width:0"></i></div>
-        <div class="hsub" id="hSub"></div>
+        <div class="bigtile" id="hStatus">
+          <div class="lbl">Orçamento do mês</div>
+          <div class="big" id="hTitulo">Sem gastos lançados</div>
+          <div class="meter" id="hMeter"><i style="width:0"></i></div>
+          <div class="hsub" id="hSub"></div>
+          <div class="hdesv" id="hDesv"></div>
+        </div>
         <div class="row">
           <div><span>Receita</span><b id="hRec">R$ 0,00</b></div>
           <div><span>Gasto real</span><b id="hReal">R$ 0,00</b></div>
           <div><span>Diferença (orçado − real)</span><b id="hDif">R$ 0,00</b></div>
           <div><span>Saldo (receita − real)</span><b id="hSaldo">—</b></div>
+          <div class="orc"><span>Orçado no mês</span><b id="hOrc">R$ 0,00</b></div>
         </div>
       </div>
       <div class="donutcard" id="donutCard" hidden>
@@ -777,11 +794,33 @@ window.FCST_SEED = {};
     $("hRec").textContent = rv(t.rec);
     $("hOrc").textContent = rv(t.o);
     $("hDif").textContent = rv(t.d);
-    $("hSub").textContent = t.o ? `${rv(t.r)} gastos · ${pct0.format(t.r / t.o)} do orçado` : "Nenhum valor orçado neste mês";
     $("hSaldo").textContent = t.rec ? rv(t.saldo) : "—";
     const used = t.o ? t.r / t.o : (t.r ? 1 : 0);
     $("hMeter").classList.toggle("over", used > 1);
     $("hMeter").firstElementChild.style.width = Math.min(100, used * 100) + "%";
+
+    // Orçamento x real por despesa: só entram despesas com gasto lançado (as ainda não pagas têm Real zerado).
+    const lanc = M().items.filter((i) => i.real > 0);
+    const acima = lanc.filter((i) => i.real - i.orcado > 0.005).sort((a, b) => (b.real - b.orcado) - (a.real - a.orcado));
+    const excesso = acima.reduce((s, i) => s + (i.real - i.orcado), 0);
+    const tile = $("hStatus");
+    tile.classList.toggle("warn", acima.length > 0);
+    tile.classList.toggle("ok", !acima.length && lanc.length > 0);
+    if (!lanc.length) {
+      $("hTitulo").textContent = "Sem gastos lançados";
+      $("hSub").textContent = t.o ? `${rv(t.o)} orçados neste mês` : "Nenhum valor orçado neste mês";
+      $("hDesv").innerHTML = "";
+    } else if (acima.length) {
+      $("hTitulo").textContent = `${acima.length} acima do orçado`;
+      $("hSub").textContent = `${rv(excesso)} além do orçamento · ${acima.length} de ${lanc.length} despesas com gasto · ${pct0.format(used)} do orçado usado`;
+      $("hDesv").innerHTML = acima.slice(0, 3).map((i) => `<div><span>${esc(i.despesa)}</span><b>+${rv(i.real - i.orcado)}</b></div>`).join("")
+        + (acima.length > 3 ? `<small>e mais ${acima.length - 3} despesa${acima.length - 3 > 1 ? "s" : ""}</small>` : "");
+    } else {
+      const sobra = lanc.reduce((s, i) => s + (i.orcado - i.real), 0);
+      $("hTitulo").textContent = "Dentro do orçamento";
+      $("hSub").textContent = `${lanc.length} despesa${lanc.length > 1 ? "s" : ""} com gasto, nenhuma estourou${sobra > 0.005 ? ` · ${rv(sobra)} abaixo do orçado` : ""} · ${pct0.format(used)} do orçado usado`;
+      $("hDesv").innerHTML = "";
+    }
   }
 
   function renderFilters() {
@@ -853,7 +892,7 @@ window.FCST_SEED = {};
       const domin = ST.reduce((a, b) => (by[a] >= by[b] ? a : b));
       ring.dataset.t = by[domin] ? `${Math.round((by[domin] / total) * 100)}%\n${ST_LABEL[domin]}` : "";
     }
-    $("donutLeg").innerHTML = ST.map((s) => `<div><span><i style="background:${SC[s]}"></i>${ST_LABEL[s]}</span><b>${rv(by[s])}</b></div>`).join("");
+    $("donutLeg").innerHTML = ST.map((s) => `<div><span><i style="background:${SC[s]}"></i>${ST_LABEL[s]}</span><b>${total ? pct0.format(by[s] / total) : "0%"}</b><small>${rv(by[s])}</small></div>`).join("");
   }
 
   function renderRec() {
@@ -1468,11 +1507,12 @@ window.FCST_SEED = {};
 <script>
 (function(){
   document.querySelectorAll(".hero").forEach(function(hero){
+    if (hero.querySelector(".bigtile")) return;
     var big = document.createElement("div"); big.className = "bigtile";
     [".lbl", ".big", ".meter", ".hsub"].forEach(function(sel){ var el = hero.querySelector(sel); if (el) big.appendChild(el); });
     hero.prepend(big);
   });
-  // Toque no card "Orçado no mês" oculta/exibe os cards de resumo (receita, gasto real, diferença, saldo).
+  // Toque no card de orçamento (topo) oculta/exibe os cards de resumo (receita, gasto real, diferença, saldo, orçado).
   var hero = document.querySelector("#v-list .hero"), tile = hero && hero.querySelector(".bigtile"), row = hero && hero.querySelector(".row");
   if (tile && row) {
     var aplicar = function(oculto){ row.hidden = oculto; tile.setAttribute("aria-expanded", String(!oculto)); try { localStorage.setItem("pf.hideCards", oculto ? "1" : "0"); } catch (e) {} };
