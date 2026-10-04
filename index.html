@@ -719,6 +719,14 @@ window.FCST_SEED = {};
     for (const m of Object.values(s.months)) {
       m.items ||= [];
       m.items.forEach((i) => { delete i.prioridade; });
+      // "Lançar despesa" não cria orçado novo: o gasto entra no orçado da despesa que já existe no mês.
+      // Lançamentos antigos (pagos, orçado = real, mesmo nome de uma despesa ainda não paga) são ajustados aqui.
+      const nm = (i) => String(i.despesa || "").trim().toUpperCase();
+      m.items.forEach((i) => {
+        if (i.lanc || i.status !== "Concluída" || !(i.real > 0) || Math.abs(i.orcado - i.real) > 0.005) return;
+        if (/\d{1,3}\s*\/\s*\d{1,3}\s*$/.test(i.despesa || "")) return; // parcelas (04/05) têm orçado próprio
+        if (m.items.some((j) => j !== i && j.status !== "Concluída" && nm(j) === nm(i))) { i.orcado = 0; i.lanc = true; }
+      });
       if (!Array.isArray(m.receitas)) m.receitas = m.receita > 0 ? [{ id: uid(), descricao: "Receita", valor: m.receita }] : [];
       delete m.receita;
     }
@@ -759,6 +767,9 @@ window.FCST_SEED = {};
   }
   function daysUntil(d) { const h = new Date(); h.setHours(0, 0, 0, 0); return Math.round((d - h) / 864e5); }
   const pago = (i) => i.status === "Concluída";
+  // Lançamento ("Lançar despesa") soma ao real da despesa que já existe no mês e segue o status dela.
+  const baseDe = (i) => (i.lanc ? M().items.find((j) => !j.lanc && String(j.despesa || "").trim().toUpperCase() === String(i.despesa || "").trim().toUpperCase()) || null : null);
+  const stEf = (i) => (baseDe(i) || i).status;
   // Rótulo e cor do vencimento de uma despesa ainda não paga.
   function dueInfo(key, i) {
     if (!(i.dia > 0)) return null;
@@ -781,7 +792,7 @@ window.FCST_SEED = {};
     const p = state.months[src];
     state.months[key] = {
       receitas: p.receitas.map((r) => ({ ...r, id: uid() })),
-      items: p.items.map((i) => ({ ...i, id: uid(), real: 0, status: "Não iniciada" })),
+      items: p.items.filter((i) => !i.lanc).map((i) => ({ ...i, id: uid(), real: 0, status: "Não iniciada" })),
       carried: true
     };
     return src;
@@ -808,7 +819,10 @@ window.FCST_SEED = {};
     $("hMeter").firstElementChild.style.width = Math.min(100, used * 100) + "%";
 
     // Orçamento x real por despesa: só entram despesas com gasto lançado (as ainda não pagas têm Real zerado).
-    const lanc = M().items.filter((i) => i.real > 0);
+    // Comparação por despesa (parcelas e lançamentos do mesmo nome somados): orçado total x real total.
+    const gm = new Map();
+    M().items.forEach((i) => { const l = String(i.despesa || "(sem nome)").replace(/\s*[-–]?\s*\d{1,3}\s*\/\s*\d{1,3}\s*$/, "").trim() || String(i.despesa).trim(), k = l.toUpperCase(), g = gm.get(k) || { despesa: l, orcado: 0, real: 0 }; g.orcado += i.orcado; g.real += i.real; gm.set(k, g); });
+    const lanc = [...gm.values()].filter((g) => g.real > 0);
     const acima = lanc.filter((i) => i.real - i.orcado > 0.005).sort((a, b) => (b.real - b.orcado) - (a.real - a.orcado));
     const excesso = acima.reduce((s, i) => s + (i.real - i.orcado), 0);
     const tile = $("hStatus");
@@ -832,14 +846,14 @@ window.FCST_SEED = {};
   }
 
   function renderFilters() {
-    const it = M().items, n = (s) => it.filter((i) => i.status === s).length;
+    const it = M().items, n = (s) => it.filter((i) => stEf(i) === s).length;
     const opts = [["", "Todas", "", it.length], ...ST.map((s) => [s, ST_LABEL[s], SC[s], n(s)])];
     $("filters").innerHTML = opts.map(([v, l, c, k]) => `<button class="f${fSt === v ? " on" : ""}" data-p="${v}">${c ? `<i style="--c:${c}"></i>` : ""}${l}<span class="fn">${k}</span></button>`).join("");
   }
 
   const gruposAbertos = new Set();
   function renderList() {
-    const items = M().items.filter((i) => (!fSt || i.status === fSt) && (!q || i.despesa.toLowerCase().includes(q)));
+    const items = M().items.filter((i) => (!fSt || stEf(i) === fSt) && (!q || i.despesa.toLowerCase().includes(q)));
     if (!items.length) { $("list").innerHTML = `<div class="empty">${M().items.length ? "Nada encontrado." : "Nenhuma despesa neste mês.<br>Toque em + para adicionar."}</div>`; return; }
     const mapa = new Map();
     items.forEach((i) => {
@@ -885,10 +899,14 @@ window.FCST_SEED = {};
     if (!it.length) { card.hidden = true; return; }
     card.hidden = false;
     // Despesas ainda não pagas têm "Real" zerado; nelas vale o orçado (o que falta pagar).
-    const valor = (i) => (pago(i) ? i.real : i.real || i.orcado);
-    const total = it.reduce((a, i) => a + valor(i), 0);
+    // Lançamentos entram na despesa-base (uma despesa conta uma vez só, com o status dela).
+    const extra = new Map();
+    it.forEach((i) => { const b = baseDe(i); if (b) extra.set(b, (extra.get(b) || 0) + i.real); });
+    const vis = it.filter((i) => !baseDe(i));
+    const valor = (i) => { const r = i.real + (extra.get(i) || 0); return pago(i) ? r : extra.has(i) ? Math.max(r, i.orcado) : r || i.orcado; };
+    const total = vis.reduce((a, i) => a + valor(i), 0);
     const by = Object.fromEntries(ST.map((s) => [s, 0]));
-    it.forEach((i) => (by[i.status] += valor(i)));
+    vis.forEach((i) => (by[i.status] += valor(i)));
     const ring = $("donutRing");
     if (!total) {
       ring.style.background = "var(--surface2)";
@@ -958,7 +976,7 @@ window.FCST_SEED = {};
     }).join("") : `<p class="note">Nenhuma despesa em ${mes}.</p>`;
 
     // 3) situação das contas pelo valor orçado (rosca)
-    const bySt = ST.map((s) => { const l = it.filter((i) => i.status === s); return { s, v: sumBy(l, (i) => i.orcado), n: l.length }; });
+    const bySt = ST.map((s) => { const l = it.filter((i) => !baseDe(i) && i.status === s); return { s, v: sumBy(l, (i) => i.orcado), n: l.length }; });
     const totO = sumBy(bySt, (x) => x.v), vis = bySt.filter((x) => x.v > 0), gap = vis.length > 1 ? 1.4 : 0;
     let acc = 0;
     const segs = vis.map((x) => {
@@ -1330,7 +1348,9 @@ window.FCST_SEED = {};
     const [ano, mes, dia] = dataVal.split("-").map(Number);
     const chave = `${ano}-${String(mes).padStart(2, "0")}`;
     state.months[chave] ||= { receitas: [], items: [] };
-    state.months[chave].items.push({ id: uid(), despesa: lancCategoria, dia, orcado: valor, real: valor, status: "Concluída", obs: $("lObs").value.trim() });
+    // Se já existe a despesa no mês (ainda não paga), o lançamento só soma ao real dela; senão vira despesa com orçado = valor.
+    const base = state.months[chave].items.some((j) => !j.lanc && j.status !== "Concluída" && String(j.despesa || "").trim().toUpperCase() === lancCategoria.trim().toUpperCase());
+    state.months[chave].items.push({ id: uid(), despesa: lancCategoria, dia, orcado: base ? 0 : valor, real: valor, status: "Concluída", obs: $("lObs").value.trim(), ...(base ? { lanc: true } : {}) });
     const mudouMes = chave !== cur;
     if (mudouMes) cur = chave;
     save(); closeSheet(); renderAll();
@@ -1399,7 +1419,7 @@ window.FCST_SEED = {};
     if (m === 0) return toast("Não há mês anterior em " + ANO);
     const prev = state.months[`${ANO}-${String(m).padStart(2, "0")}`];
     if (!prev || !(prev.items.length || prev.receitas.length)) return toast("O mês anterior está vazio");
-    prev.items.forEach((i) => M().items.push({ ...i, id: uid(), real: 0, status: "Não iniciada" }));
+    prev.items.filter((i) => !i.lanc).forEach((i) => M().items.push({ ...i, id: uid(), real: 0, status: "Não iniciada" }));
     prev.receitas.forEach((r) => M().receitas.push({ ...r, id: uid() }));
     save(); renderAll(); setView("list"); toast(`${prev.items.length} despesas e ${prev.receitas.length} receitas copiadas`);
   };
