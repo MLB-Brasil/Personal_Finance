@@ -108,6 +108,7 @@ main { padding: 6px 16px 0; }
 .hero.green { background: linear-gradient(135deg, #3a9a74 0%, #4aa982 45%, #4bb0a3 100%); box-shadow: 0 12px 30px rgba(58, 154, 116, .25); margin-bottom: 16px; }
 .hero .row span { display: block; font-size: 11px; opacity: .8; }
 .hero .row b { font-size: 15px; font-variant-numeric: tabular-nums; }
+.hero .row[hidden] { display: none; }
 
 /* filtros */
 .filters { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 16px -16px 10px; padding-inline: 16px; }
@@ -615,6 +616,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
   <h2 id="sheetLTitle">Lançar despesa</h2>
   <div class="field"><label for="lData">Data</label><input id="lData" type="date"></div>
   <div class="field"><label for="lVal">R$ Valor</label><input id="lVal" type="number" step="0.01" inputmode="decimal" placeholder="0,00"></div>
+  <div class="field"><label for="lObs">Observações</label><input id="lObs" type="text" autocomplete="off" placeholder="Ex.: parcela 2/5, compra no débito"></div>
   <button class="btn primary" id="lSave">Salvar</button>
 </div>
 <div class="sheet" id="sheetN" role="dialog" aria-modal="true" aria-labelledby="sheetNTitle">
@@ -835,9 +837,11 @@ window.FCST_SEED = {};
     const it = M().items, card = $("donutCard");
     if (!it.length) { card.hidden = true; return; }
     card.hidden = false;
-    const total = it.reduce((a, i) => a + i.real, 0);
+    // Despesas ainda não pagas têm "Real" zerado; nelas vale o orçado (o que falta pagar).
+    const valor = (i) => (pago(i) ? i.real : i.real || i.orcado);
+    const total = it.reduce((a, i) => a + valor(i), 0);
     const by = Object.fromEntries(ST.map((s) => [s, 0]));
-    it.forEach((i) => (by[i.status] += i.real));
+    it.forEach((i) => (by[i.status] += valor(i)));
     const ring = $("donutRing");
     if (!total) {
       ring.style.background = "var(--surface2)";
@@ -1254,7 +1258,7 @@ window.FCST_SEED = {};
     lancCategoria = categoria;
     $("sheetLTitle").textContent = `Lançar despesa · ${categoria}`;
     $("lData").value = toDateInputValue(new Date());
-    $("lVal").value = "";
+    $("lVal").value = ""; $("lObs").value = "";
     document.body.classList.add("sheetl-open");
     setTimeout(() => $("lVal").focus(), 300);
   }
@@ -1265,7 +1269,7 @@ window.FCST_SEED = {};
     const [ano, mes, dia] = dataVal.split("-").map(Number);
     const chave = `${ano}-${String(mes).padStart(2, "0")}`;
     state.months[chave] ||= { receitas: [], items: [] };
-    state.months[chave].items.push({ id: uid(), despesa: lancCategoria, dia, orcado: valor, real: valor, status: "Concluída", obs: "" });
+    state.months[chave].items.push({ id: uid(), despesa: lancCategoria, dia, orcado: valor, real: valor, status: "Concluída", obs: $("lObs").value.trim() });
     const mudouMes = chave !== cur;
     if (mudouMes) cur = chave;
     save(); closeSheet(); renderAll();
@@ -1468,6 +1472,16 @@ window.FCST_SEED = {};
     [".lbl", ".big", ".meter", ".hsub"].forEach(function(sel){ var el = hero.querySelector(sel); if (el) big.appendChild(el); });
     hero.prepend(big);
   });
+  // Toque no card "Orçado no mês" oculta/exibe os cards de resumo (receita, gasto real, diferença, saldo).
+  var hero = document.querySelector("#v-list .hero"), tile = hero && hero.querySelector(".bigtile"), row = hero && hero.querySelector(".row");
+  if (tile && row) {
+    var aplicar = function(oculto){ row.hidden = oculto; tile.setAttribute("aria-expanded", String(!oculto)); try { localStorage.setItem("pf.hideCards", oculto ? "1" : "0"); } catch (e) {} };
+    tile.style.cursor = "pointer"; tile.tabIndex = 0; tile.setAttribute("role", "button"); tile.title = "Tocar para ocultar/exibir os cards de resumo";
+    var ini = false; try { ini = localStorage.getItem("pf.hideCards") === "1"; } catch (e) {}
+    aplicar(ini);
+    tile.addEventListener("click", function(){ aplicar(!row.hidden); });
+    tile.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); aplicar(!row.hidden); } });
+  }
 })();
 </script>
 </body>
