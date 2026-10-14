@@ -435,7 +435,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
   .fab { right: 32px; bottom: 32px; }
 
   /* despesas: resumo numa faixa, cards em várias colunas */
-  #v-list .hero { grid-template-columns: minmax(300px, 1fr) 1.6fr; align-items: stretch; gap: 14px; }
+  #v-list .hero { grid-template-columns: 1fr; align-items: stretch; gap: 14px; }
   .bigtile { display: flex; flex-direction: column; justify-content: center; }
   .hero .row { grid-template-columns: repeat(2, 1fr); }
   .donutcard { margin: 16px 0; max-width: 520px; }
@@ -508,13 +508,6 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
           <div class="meter" id="hMeter"><i style="width:0"></i></div>
           <div class="hsub" id="hSub"></div>
           <div class="hdesv" id="hDesv"></div>
-        </div>
-        <div class="row">
-          <div><span>Receita</span><b id="hRec">R$ 0,00</b></div>
-          <div><span>Gasto real</span><b id="hReal">R$ 0,00</b></div>
-          <div><span>Diferença (orçado − real)</span><b id="hDif">R$ 0,00</b></div>
-          <div><span>Saldo (receita − real)</span><b id="hSaldo">—</b></div>
-          <div class="orc"><span>Orçado no mês</span><b id="hOrc">R$ 0,00</b></div>
         </div>
       </div>
       <div class="donutcard" id="donutCard" hidden>
@@ -602,8 +595,8 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
 
 <nav class="nav"><div>
   <button data-view="list" class="on"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>Despesas</button>
-  <button data-view="rec"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Receitas</button>
   <button data-view="sum"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Resumo</button>
+  <button data-view="rec"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg>Receitas</button>
   <button data-view="set"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Ajustes</button>
 </div></nav>
 
@@ -809,11 +802,6 @@ window.FCST_SEED = {};
 
   function renderHero() {
     const t = totals();
-    $("hReal").textContent = rv(t.r);
-    $("hRec").textContent = rv(t.rec);
-    $("hOrc").textContent = rv(t.o);
-    $("hDif").textContent = rv(t.d);
-    $("hSaldo").textContent = t.rec ? rv(t.saldo) : "—";
     const used = t.o ? t.r / t.o : (t.r ? 1 : 0);
     $("hMeter").classList.toggle("over", used > 1);
     $("hMeter").firstElementChild.style.width = Math.min(100, used * 100) + "%";
@@ -835,8 +823,9 @@ window.FCST_SEED = {};
     } else if (acima.length) {
       $("hTitulo").textContent = `${acima.length} acima do orçado`;
       $("hSub").textContent = `${rv(excesso)} além do orçamento · ${acima.length} de ${lanc.length} despesas com gasto · ${pct0.format(used)} do orçado usado`;
-      $("hDesv").innerHTML = acima.slice(0, 3).map((i) => `<div><span>${esc(i.despesa)}</span><b>+${rv(i.real - i.orcado)}</b></div>`).join("")
-        + (acima.length > 3 ? `<small>e mais ${acima.length - 3} despesa${acima.length - 3 > 1 ? "s" : ""}</small>` : "");
+      const aberto = $("hStatus").classList.contains("exp"), vis = aberto ? acima : acima.slice(0, 3), resto = acima.length - 3;
+      $("hDesv").innerHTML = vis.map((i) => `<div><span>${esc(i.despesa)}</span><b>+${rv(i.real - i.orcado)}</b></div>`).join("")
+        + (resto > 0 ? `<small>${aberto ? "Tocar para recolher" : `e mais ${resto} despesa${resto > 1 ? "s" : ""} · tocar para ver todas`}</small>` : "");
     } else {
       const sobra = lanc.reduce((s, i) => s + (i.orcado - i.real), 0);
       $("hTitulo").textContent = "Dentro do orçamento";
@@ -846,8 +835,11 @@ window.FCST_SEED = {};
   }
 
   function renderFilters() {
-    const it = M().items, n = (s) => it.filter((i) => stEf(i) === s).length;
-    const opts = [["", "Todas", "", it.length], ...ST.map((s) => [s, ST_LABEL[s], SC[s], n(s)])];
+    // A lista mostra uma linha por despesa (parcelas e lançamentos do mesmo nome agrupados),
+    // então o contador também conta despesas, não lançamentos.
+    const it = M().items, grp = (l) => new Set(l.map((i) => baseName(i.despesa || "(sem nome)").toUpperCase())).size;
+    const n = (s) => grp(it.filter((i) => stEf(i) === s));
+    const opts = [["", "Todas", "", grp(it)], ...ST.map((s) => [s, ST_LABEL[s], SC[s], n(s)])];
     $("filters").innerHTML = opts.map(([v, l, c, k]) => `<button class="f${fSt === v ? " on" : ""}" data-p="${v}">${c ? `<i style="--c:${c}"></i>` : ""}${l}<span class="fn">${k}</span></button>`).join("");
   }
 
@@ -958,6 +950,9 @@ window.FCST_SEED = {};
     // 1) números do mês
     const kpis = `<div class="kpis">
       ${kpi("Receita", rv(t.rec), `${M().receitas.length} lançamento${M().receitas.length === 1 ? "" : "s"}`, "var(--c-rec)")}
+      ${kpi("Gasto real", rv(t.r), t.o ? `${pct0.format(t.r / t.o)} do orçado` : "", "var(--c-gas)")}
+      ${kpi("Diferença (orçado − real)", `<span class="${semSinal(t.d)}">${rv(t.d)}</span>`, t.d < -0.005 ? "gastou acima do orçado" : t.r ? "dentro do orçado" : "")}
+      ${kpi("Saldo (receita − real)", t.rec ? `<span class="${semSinal(t.saldo)}">${rv(t.saldo)}</span>` : "—", t.rec ? `${pct0.format(t.r / t.rec)} da receita gasta` : "sem receita no mês")}
       ${kpi("Orçado", rv(t.o), `${it.length} despesa${it.length === 1 ? "" : "s"}`)}
       ${kpi("Receita − orçado", `<span class="${semSinal(t.rec - t.o)}">${t.rec || t.o ? rv(t.rec - t.o) : "—"}</span>`, !t.rec ? "sem receita no mês" : t.rec >= t.o ? `sobra planejada · ${pct0.format(t.o / t.rec)} da receita orçada` : "orçamento acima da receita").replace('class="kpi"', 'class="kpi wide"')}
     </div>`;
@@ -1539,6 +1534,7 @@ window.FCST_SEED = {};
     const tinhaSW = Boolean(navigator.serviceWorker.controller);
     navigator.serviceWorker.addEventListener("controllerchange", () => { if (tinhaSW) { novaVersao = true; aplicarAtualizacao(); } });
   }
+  document.addEventListener("pf-hero", renderHero);
   checarAtualizacao();
   setInterval(checarAtualizacao, 15 * 60 * 1000);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checarAtualizacao(); });
@@ -1554,15 +1550,13 @@ window.FCST_SEED = {};
     [".lbl", ".big", ".meter", ".hsub"].forEach(function(sel){ var el = hero.querySelector(sel); if (el) big.appendChild(el); });
     hero.prepend(big);
   });
-  // Toque no card de orçamento (topo) oculta/exibe os cards de resumo (receita, gasto real, diferença, saldo, orçado).
-  var hero = document.querySelector("#v-list .hero"), tile = hero && hero.querySelector(".bigtile"), row = hero && hero.querySelector(".row");
-  if (tile && row) {
-    var aplicar = function(oculto){ row.hidden = oculto; tile.setAttribute("aria-expanded", String(!oculto)); try { localStorage.setItem("pf.hideCards", oculto ? "1" : "0"); } catch (e) {} };
-    tile.style.cursor = "pointer"; tile.tabIndex = 0; tile.setAttribute("role", "button"); tile.title = "Tocar para ocultar/exibir os cards de resumo";
-    var ini = false; try { ini = localStorage.getItem("pf.hideCards") === "1"; } catch (e) {}
-    aplicar(ini);
-    tile.addEventListener("click", function(){ aplicar(!row.hidden); });
-    tile.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); aplicar(!row.hidden); } });
+  // Toque no card de orçamento (topo) expande/recolhe a lista de todas as despesas acima do orçado (recolhido mostra só as 3 maiores).
+  var tile = document.getElementById("hStatus");
+  if (tile) {
+    var alternar = function(){ if (!tile.classList.contains("warn")) return; tile.classList.toggle("exp"); tile.setAttribute("aria-expanded", String(tile.classList.contains("exp"))); document.dispatchEvent(new Event("pf-hero")); };
+    tile.style.cursor = "pointer"; tile.tabIndex = 0; tile.setAttribute("role", "button"); tile.setAttribute("aria-expanded", "false");
+    tile.addEventListener("click", alternar);
+    tile.addEventListener("keydown", function(e){ if (e.key === "Enter" || e.key === " ") { e.preventDefault(); alternar(); } });
   }
 })();
 </script>
