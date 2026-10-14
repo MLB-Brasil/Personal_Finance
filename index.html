@@ -79,6 +79,24 @@ button { border: 0; background: none; cursor: pointer; }
 .ln.tot span { color: var(--muted); font-weight: 600; }
 .lh { display: flex; justify-content: space-between; padding: 14px 0 4px; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); font-weight: 700; }
 .lh:first-child { padding-top: 12px; }
+/* receitas: cards com avatar, participação e total em destaque */
+.rgrp { display: grid; gap: 8px; margin-bottom: 14px; }
+.rgh { display: flex; align-items: center; justify-content: space-between; padding: 4px 4px 0; font-size: 12px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); font-weight: 700; }
+.rgh em { font-style: normal; text-transform: none; letter-spacing: 0; color: var(--pos); background: rgba(18,161,80,.12); border-radius: 999px; padding: 3px 10px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.rc-card { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; padding: 12px 14px; background: var(--surface); border-radius: 18px; box-shadow: var(--shadow); cursor: pointer; transition: transform .1s; }
+.rc-card:active { transform: scale(.985); }
+.rc-av { width: 44px; height: 44px; border-radius: 14px; display: grid; place-content: center; font-weight: 800; font-size: 17px; color: #fff; background: linear-gradient(135deg, #12a150, #3aaa8a); }
+.rc-mid { min-width: 0; }
+.rc-mid h3 { margin: 0; font-size: 15px; font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rc-bar { height: 5px; border-radius: 4px; background: var(--surface2); overflow: hidden; margin-top: 7px; }
+.rc-bar i { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #12a150, #3aaa8a); }
+.rc-mid small { display: block; margin-top: 4px; font-size: 11px; color: var(--muted); }
+.rc-val { font-weight: 800; color: var(--pos); font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 15px; }
+.rc-tot { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: 18px; background: rgba(18,161,80,.12); color: var(--pos); font-weight: 800; font-variant-numeric: tabular-nums; }
+.rc-tot span { font-size: 12px; text-transform: uppercase; letter-spacing: .6px; font-weight: 700; }
+.rc-tot b { font-size: 18px; }
+#v-rec .hsub { font-size: 12.5px; margin-top: 8px; opacity: .92; }
+@media (min-width: 900px) { .rc-card:hover { background: var(--surface2); } }
 /* filtro de mês */
 .mfbar { display: flex; align-items: center; gap: 8px; padding-bottom: 4px; }
 .mf { flex: 1; display: flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-weight: 650; font-size: 13px; text-align: left; }
@@ -525,6 +543,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
         <div class="lbl">Receita no mês</div>
         <div class="big" id="rTotal">R$ 0,00</div>
         <div class="meter" id="rMeter"><i style="width:0"></i></div>
+        <div class="hsub" id="rSub"></div>
         <div class="row">
           <div><span>Despesa real</span><b id="rReal">R$ 0,00</b></div>
           <div><span>Saldo</span><b id="rSaldo">R$ 0,00</b></div>
@@ -704,7 +723,7 @@ window.FCST_SEED = {};
   const nowKey = () => `${ANO}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
   let lastNow = nowKey();
   let cur = lastNow;
-  let recScope = "mes", sumScope = "mes", view = "list", fSt = "", q = "", editing = null, sheet = null, delArmed = false;
+  let recScope = "mes", sumScope = "mes", view = "list", fSt = "Não iniciada", q = "", editing = null, sheet = null, delArmed = false;
 
   // Cada mês tem `items` (despesas) e `receitas` (colunas K "Receita" e L "R$" da planilha).
   // Dados antigos tinham um único número `receita`; ele vira uma receita "Receita".
@@ -921,17 +940,25 @@ window.FCST_SEED = {};
     const used = t.rec ? t.r / t.rec : (t.r ? 1 : 0);
     $("rMeter").classList.toggle("over", used > 1);
     $("rMeter").firstElementChild.style.width = Math.min(100, used * 100) + "%";
-    const line = (r, m) => `<div class="ln" data-rid="${r.id}" data-m="${m}"><span>${esc(r.descricao || "(sem descrição)")}</span><b>${rv(r.valor)}</b></div>`;
+    $("rSub").textContent = !t.rec ? "Nenhuma receita neste mês" : `${rs.length} receita${rs.length === 1 ? "" : "s"} · ${pct0.format(used)} da receita já gasta`;
+    // Cada receita vira um card: inicial, descrição, participação no total do período e valor.
+    const line = (r, m, base) => {
+      const nome = r.descricao || "(sem descrição)", p = base ? r.valor / base : 0;
+      return `<div class="rc-card" data-rid="${r.id}" data-m="${m}"><span class="rc-av">${esc(nome.trim().charAt(0).toUpperCase() || "?")}</span>
+        <div class="rc-mid"><h3>${esc(nome)}</h3><div class="rc-bar"><i style="width:${Math.min(100, p * 100)}%"></i></div><small>${pct0.format(p)} do total</small></div>
+        <b class="rc-val">${rv(r.valor)}</b></div>`;
+    };
     document.querySelectorAll("#recScope button").forEach((b) => b.classList.toggle("on", b.dataset.s === recScope));
     let html;
     if (recScope === "mes") {
-      html = rs.length ? `<div class="lines">${rs.map((r) => line(r, cur)).join("")}<div class="ln tot"><span>Total</span><b>${rv(t.rec)}</b></div></div>`
+      html = rs.length ? `<div class="rgrp">${rs.map((r) => line(r, cur, t.rec)).join("")}<div class="rc-tot"><span>Total do mês</span><b>${rv(t.rec)}</b></div></div>`
         : `<div class="empty">Nenhuma receita neste mês.<br>Toque em + para adicionar.</div>`;
     } else {
       const keys = Object.keys(state.months).filter((k) => state.months[k].receitas.length).sort();
       const sum = (m) => m.receitas.reduce((s, r) => s + r.valor, 0);
-      html = keys.length ? `<div class="lines">${keys.map((k) => `<div class="lh"><span>${MES[Number(k.split("-")[1]) - 1]}</span><span>${rv(sum(state.months[k]))}</span></div>${state.months[k].receitas.map((r) => line(r, k)).join("")}`).join("")}
-        <div class="ln tot"><span>Total do ano</span><b>${rv(keys.reduce((s, k) => s + sum(state.months[k]), 0))}</b></div></div>`
+      const totAno = keys.reduce((s, k) => s + sum(state.months[k]), 0);
+      html = keys.length ? keys.map((k) => `<div class="rgrp"><div class="rgh"><span>${MES[Number(k.split("-")[1]) - 1]}</span><em>${rv(sum(state.months[k]))}</em></div>${state.months[k].receitas.map((r) => line(r, k, sum(state.months[k]))).join("")}</div>`).join("")
+        + `<div class="rc-tot"><span>Total do ano</span><b>${rv(totAno)}</b></div>`
         : `<div class="empty">Nenhuma receita cadastrada em ${ANO}.</div>`;
     }
     $("recList").innerHTML = html;
