@@ -534,6 +534,7 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
       </div>
       <div class="filters" id="filters"></div>
       <input class="search" id="search" type="search" placeholder="Buscar despesa…" aria-label="Buscar despesa">
+      <button class="btn" id="copyBar" type="button" style="margin-bottom:12px">Carregar do mês anterior</button>
       <div class="list" id="list"></div>
     </section>
 
@@ -850,7 +851,7 @@ window.FCST_SEED = {};
     if (!items.length) {
       $("list").innerHTML = M().items.length
         ? `<div class="empty">Nada encontrado.</div>`
-        : `<div class="empty">Nenhuma despesa neste mês.<br>Toque em + para adicionar.<br><button class="btn" data-copy-prev type="button" style="margin-top:12px">Carregar do mês anterior</button></div>`;
+        : `<div class="empty">Nenhuma despesa neste mês.<br>Toque em + para adicionar.</div>`;
       return;
     }
     const mapa = new Map();
@@ -1416,7 +1417,6 @@ window.FCST_SEED = {};
     }
     const add = e.target.closest(".cat-add");
     if (add) { openLancamento(add.dataset.label); return; }
-    if (e.target.closest("[data-copy-prev]")) { copiarMesAnterior(); return; }
     const row = e.target.closest(".cat-item"); if (!row) return;
     openSheet(row.dataset.id);
   };
@@ -1428,12 +1428,14 @@ window.FCST_SEED = {};
     if (m === 0) return toast("Não há mês anterior em " + ANO);
     const prev = state.months[`${ANO}-${String(m).padStart(2, "0")}`];
     if (!prev || !(prev.items.length || prev.receitas.length)) return toast("O mês anterior está vazio");
+    if (M().items.length && !confirm("Este mês já tem despesas. Adicionar também as do mês anterior?")) return;
     const despesas = prev.items.filter((i) => !i.lanc);
     despesas.forEach((i) => M().items.push({ id: uid(), despesa: i.despesa, orcado: i.orcado, dia: i.dia, real: 0, status: "Não iniciada", obs: "" }));
     prev.receitas.forEach((r) => M().receitas.push({ ...r, id: uid() }));
     save(); renderAll(); setView("list"); toast(`${despesas.length} despesas e ${prev.receitas.length} receitas copiadas`);
   }
   $("copyPrev").onclick = copiarMesAnterior;
+  $("copyBar").onclick = copiarMesAnterior;
 
   function download(name, content, type) {
     const a = document.createElement("a");
