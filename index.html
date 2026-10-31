@@ -580,8 +580,8 @@ body.auth-locked .app, body.auth-locked .fab, body.auth-locked .nav { display: n
           <button type="button" data-t="light">Claro</button>
           <button type="button" data-t="dark">Escuro</button>
         </div>
-        <button class="btn" id="copyPrev">Copiar despesas e receitas do mês anterior</button>
-        <p class="note">Automático: ao abrir um mês vazio, o app copia o último mês com lançamentos (despesas com o mesmo orçado, “Real” zerado e status “A pagar”; receitas iguais). Este botão faz a mesma cópia manualmente.</p>
+        <button class="btn" id="copyPrev">Carregar do mês anterior</button>
+        <p class="note">Copia para o mês atual os nomes, o orçamento e o dia de vencimento das despesas (com “Real” zerado) e todas as receitas do mês anterior. Nenhum mês é preenchido automaticamente.</p>
       </div>
       <div class="panel">
         <h2>Lembretes de vencimento</h2>
@@ -792,24 +792,6 @@ window.FCST_SEED = {};
     return { c: "", t: `vence dia ${i.dia}` };
   }
 
-  // ---------- cópia automática para meses novos ----------
-  // Mês vazio (e que ainda não recebeu cópia) herda tudo do último mês com lançamentos:
-  // despesas com o mesmo orçado, "Real" zerado (o usuário preenche) e status "A pagar"; receitas iguais.
-  // A marca `carried` impede que um mês esvaziado de propósito seja preenchido de novo.
-  function carryForward(key) {
-    const m = state.months[key];
-    if (m && (m.carried || m.items.length || m.receitas.length)) return null;
-    const src = Object.keys(state.months).filter((k) => k < key && (state.months[k].items.length || state.months[k].receitas.length)).sort().pop();
-    if (!src) return null;
-    const p = state.months[src];
-    state.months[key] = {
-      receitas: p.receitas.map((r) => ({ ...r, id: uid() })),
-      items: p.items.filter((i) => !i.lanc).map((i) => ({ ...i, id: uid(), real: 0, status: "Não iniciada" })),
-      carried: true
-    };
-    return src;
-  }
-
   let toastT;
   function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 2200); }
 
@@ -865,7 +847,12 @@ window.FCST_SEED = {};
   const gruposAbertos = new Set();
   function renderList() {
     const items = M().items.filter((i) => (!fSt || stEf(i) === fSt) && (!q || i.despesa.toLowerCase().includes(q)));
-    if (!items.length) { $("list").innerHTML = `<div class="empty">${M().items.length ? "Nada encontrado." : "Nenhuma despesa neste mês.<br>Toque em + para adicionar."}</div>`; return; }
+    if (!items.length) {
+      $("list").innerHTML = M().items.length
+        ? `<div class="empty">Nada encontrado.</div>`
+        : `<div class="empty">Nenhuma despesa neste mês.<br>Toque em + para adicionar.<br><button class="btn" data-copy-prev type="button" style="margin-top:12px">Carregar do mês anterior</button></div>`;
+      return;
+    }
     const mapa = new Map();
     items.forEach((i) => {
       const label = baseName(i.despesa || "(sem nome)"), key = label.toUpperCase();
@@ -1221,8 +1208,6 @@ window.FCST_SEED = {};
   }
 
   function renderAll() {
-    const src = carryForward(cur);
-    if (src) { save(); toast(`Despesas e receitas de ${MES[Number(src.split("-")[1]) - 1]} copiadas para ${MES[mIdx()]}`); }
     renderMonths(); renderHero(); renderFilters(); renderList(); renderDonutStatus(); renderRec(); renderSummary();
     agendarLembretes();
   }
@@ -1431,20 +1416,24 @@ window.FCST_SEED = {};
     }
     const add = e.target.closest(".cat-add");
     if (add) { openLancamento(add.dataset.label); return; }
+    if (e.target.closest("[data-copy-prev]")) { copiarMesAnterior(); return; }
     const row = e.target.closest(".cat-item"); if (!row) return;
     openSheet(row.dataset.id);
   };
   $("fab").onclick = () => (view === "rec" ? openRec(null) : openSheet(null));
   document.querySelector(".nav").onclick = (e) => { const b = e.target.closest("[data-view]"); if (b) setView(b.dataset.view); };
-  $("copyPrev").onclick = () => {
+  // Copia do mês anterior nomes, orçado e dia de vencimento das despesas (sem observações ou real) e todas as receitas.
+  function copiarMesAnterior() {
     const m = mIdx();
     if (m === 0) return toast("Não há mês anterior em " + ANO);
     const prev = state.months[`${ANO}-${String(m).padStart(2, "0")}`];
     if (!prev || !(prev.items.length || prev.receitas.length)) return toast("O mês anterior está vazio");
-    prev.items.filter((i) => !i.lanc).forEach((i) => M().items.push({ ...i, id: uid(), real: 0, status: "Não iniciada" }));
+    const despesas = prev.items.filter((i) => !i.lanc);
+    despesas.forEach((i) => M().items.push({ id: uid(), despesa: i.despesa, orcado: i.orcado, dia: i.dia, real: 0, status: "Não iniciada", obs: "" }));
     prev.receitas.forEach((r) => M().receitas.push({ ...r, id: uid() }));
-    save(); renderAll(); setView("list"); toast(`${prev.items.length} despesas e ${prev.receitas.length} receitas copiadas`);
-  };
+    save(); renderAll(); setView("list"); toast(`${despesas.length} despesas e ${prev.receitas.length} receitas copiadas`);
+  }
+  $("copyPrev").onclick = copiarMesAnterior;
 
   function download(name, content, type) {
     const a = document.createElement("a");
